@@ -1,2 +1,2 @@
 # Zenekar
-form a band
+Techtaboros zenekar app
