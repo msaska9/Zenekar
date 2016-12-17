@@ -6,4 +6,7 @@ Gittel ennek a reponak a klonozasa:
 
 Kovetkezo parancs:
 `npm install`
-ez felteszi az osszes fuggoseget(eddig meg csak az Express.js-t)
+ez felteszi az osszes fuggosegeket (body-parser, express, pug, sqlite3)
+
+Inditas:
+'node index.js'

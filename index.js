@@ -13,14 +13,19 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 
 app.get('/', function (req, res) {
     console.log('GET request on /')
-    res.render('index', { title: 'Hey', message: 'Hello there!' })
+    res.render('index')
 })
 
 app.post('/action', function (req, res) {
     console.log('POST /action with name ' + req.body.firstname)
     var adat=req.body.firstname
     maindb.query("INSERT INTO user_info (info) VALUES (?)", null, [[adat]])
-    res.render('index', { title: 'Hey', message: 'Hello there!' })
+    maindb.query("SELECT info FROM user_info", function(err, res) {
+    	for(var i=0; i<res.length; i++) {
+    		console.log(res[i].info);
+    	}
+    }, [[]]);
+    res.render('index')
 })
 
 app.listen(3000, function () {
