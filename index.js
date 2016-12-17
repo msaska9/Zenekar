@@ -10,6 +10,11 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   extended: true
 }));
 
+function output(err, res) {
+	for(var i=0; i<res.length; i++) {
+    		console.log(res[i].info);
+   }
+}
 
 app.get('/', function (req, res) {
     console.log('GET request on /')
@@ -20,11 +25,7 @@ app.post('/action', function (req, res) {
     console.log('POST /action with name ' + req.body.firstname)
     var adat=req.body.firstname
     maindb.query("INSERT INTO user_info (info) VALUES (?)", null, [[adat]])
-    maindb.query("SELECT info FROM user_info", function(err, res) {
-    	for(var i=0; i<res.length; i++) {
-    		console.log(res[i].info);
-    	}
-    }, [[]]);
+    maindb.query("SELECT info FROM user_info", function(err, res){output(err, res)}, [[]]);
     res.render('index')
 })
 
