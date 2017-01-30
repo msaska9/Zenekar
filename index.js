@@ -126,8 +126,12 @@ app.get('/adatbazis', function (req, res) {
 		}
 
 		res.render('adatbazis', { user: tomb });
-	}, [[]])
-})
+	}, [[]]);
+});
+
+app.get('/profile', function (req, res) {
+	res.render('profil', { userdata: req.user });
+});
 
 app.listen(3000, function () {
 	maindb.query("CREATE TABLE if not exists user (firstname TEXT, lastname TEXT, email TEXT, password TEXT)", null, [[]])
