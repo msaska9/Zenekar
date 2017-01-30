@@ -17,7 +17,9 @@ var bodyParser = require('body-parser');
 app.use(express.static('public'));
 app.use(cookieParser());
 app.use(bodyParser());
-app.use(session({ secret: 'KEK LOL ROFL HAHA LUL WOW OMG LMAO' }));
+app.use(session({
+  secret: 'KEK LOL ROFL HAHA LUL WOW OMG LMAO'
+}));
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(bodyParser.json()); // to support JSON-encoded bodies
@@ -25,30 +27,78 @@ app.use(bodyParser.urlencoded({ // to support URL-encoded bodies
   extended: true
 }));
 
+// itt írjuk meg a saját stratégiánkat, ami szerint eldöntjük, hogy beléphet-e a
+// user vagy sem
+passport.use(new LocalStrategy(
+  function (email, pw, done) {
+    var given_email = email;
+    var given_password = pw;
+    console.log('kukucs');
+    maindb.query("SELECT * FROM user WHERE email=?", function (err, result) {
+      if (result.length == 0) {
+        console.log('No such email');
+        return done(null, false);
+      } else {
+        var userdata = result[0];
+        if (md5(given_password) != userdata.password) { // ha rossz a jelszó
+          console.log('Bad password');
+          return done(null, false); // ezt a függvényt kell hívni a dokumentáció szerint
+        }
+        if (md5(given_password) == userdata.password) { // ha jó a jelszó, akkor minden OK
+          console.log("New login");
+          return done(null, userdata); // továbbküldjük a user változót
+        }
+      }
+    }, [
+      [given_email]
+    ])
+  }
+));
+
+// elmentjük a user-t a sessionbe
+passport.serializeUser(function (user, done) {
+  done(null, user); // user elmentése
+});
+
+// ha pl. kijelentkezik, akkor nincs már szükség arra, hogy
+// az adatai továbbra is a sessionben legyenek tárolva
+passport.deserializeUser(function (user, done) {
+  done(err, user);
+});
+
+function checkLogin(req, res, next) { // a saját checkLogin middleware függvényünk
+  if (req.user) { // a user be van jelentkezve, van joga látni a titkos oldalt
+    console.log('user is logged in');
+    res.redirect('/secret_page'); // átirányítjuk a titkos oldalra
+  } else { // a user nincs bejelentkezve
+    console.log('user is not logged in');
+    res.redirect('/signin'); // átirányítjuk a bejelentkezéshez
+  }
+  next();
+}
+
 function output(err, res) {
   for (var i = 0; i < res.length; i++) {
     console.log(res[i].info);
   }
 }
 
-app.get('/', function (req, res) {
+/*app.get('/', function (req, res) {
   console.log('GET request on /')
   res.render('index')
-})
+})*/
 
 app.get('/signin', function (req, res) {
-  console.log('GET request on /signin')
-  res.render('signin')
-})
+  console.log('GET request on /signin');
+  res.render('signin');
+});
 
 app.get('/signup', function (req, res) {
-  console.log('GET request on /signup')
-  res.render('signup')
-})
+  console.log('GET request on /signup');
+  res.render('signup');
+});
 
-app.post('/signin', function (req, res) {
-
-})
+app.post('/signin', passport.authenticate('local', { successRedirect: '/', failureRedirect: '/signin' }));
 
 app.post('/signup', function (req, res) {
   var adat = Object();
@@ -63,6 +113,10 @@ app.post('/signup', function (req, res) {
     [adat.firstname, adat.lastname, adat.email, adat.pw]
   ]);
 });
+
+
+app.get('/', checkLogin); // használjuk a middlewaret, ha a /-re jön egy request
+
 
 /*app.post('/action', function (req, res) {
     console.log('POST /action with name ' + req.body.firstname)
