@@ -1,11 +1,25 @@
 var express = require('express');
 var app = express();
-var dbapi = require('./db.js');
-var maindb = new dbapi.database("mydb.db");
 
 app.set('view engine', 'pug');
+
+// require
+var dbapi = require('./db.js');
+var maindb = new dbapi.database("mydb.db");
+var passport = require('passport');
+var LocalStrategy = require('passport-local').Strategy;
+var cookieParser = require('cookie-parser');
+var session = require('express-session');
 var md5 = require('js-md5');
 var bodyParser = require('body-parser');
+
+// middleware config
+app.use(express.static('public'));
+app.use(cookieParser());
+app.use(bodyParser());
+app.use(session({ secret: 'KEK LOL ROFL HAHA LUL WOW OMG LMAO' }));
+app.use(passport.initialize());
+app.use(passport.session());
 app.use(bodyParser.json()); // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({ // to support URL-encoded bodies
   extended: true
