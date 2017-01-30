@@ -1,0 +1,21 @@
+.mindegy {
+  display: flex; /* or inline-flex */
+  flex-direction: row;
+  justify-content: center;
+}
+div{
+    text-align:center;
+}
+.kiskutya{
+    display: flex; /* or inline-flex */
+    flex-direction: column;
+    justify-content: center;
+}
+.fulek{
+    display: flex; /* or inline-flex */
+    flex-direction: row;
+    justify-content: space-around;
+}
+.ful{
+    color: red;
+}
