@@ -78,7 +78,7 @@ passport.deserializeUser(function (user, done) {
 function checkLogin(req, res, next) { // a saját checkLogin middleware függvényünk
 	if (req.user) { // a user be van jelentkezve, van joga látni a titkos oldalt
 		console.log('user is logged in');
-		res.redirect('/secret_page'); // átirányítjuk a titkos oldalra
+		res.redirect('/profile'); // átirányítjuk a titkos oldalra
 	} else { // a user nincs bejelentkezve
   		console.log('user is not logged in');
 		res.redirect('/signin'); // átirányítjuk a bejelentkezéshez
@@ -108,10 +108,11 @@ app.post('/signup', function (req, res) {
 	adat.email = req.body.email;
 	adat.pw = req.body.pw;
 	adat.pw = md5(adat.pw);
+	adat.instrument = "zongora";
 
-	maindb.query("INSERT INTO user (firstname, lastname, email, password) VALUES (?, ?, ?, ?)", function (err, result) {
-		res.render('signup');
-	}, [[adat.firstname, adat.lastname, adat.email, adat.pw]]);
+	maindb.query("INSERT INTO user (firstname, lastname, email, password, instrument) VALUES (?, ?, ?, ?, ?)", function (err, result) {
+		res.render('signin');
+	}, [[adat.firstname, adat.lastname, adat.email, adat.pw, adat.instrument]]);
 });
 
 
@@ -122,7 +123,7 @@ app.get('/adatbazis', function (req, res) {
 
 	maindb.query("SELECT * FROM user", function (err, result) {
 		for (var i = 0; i < result.length; i++) {
-    		tomb.push([result[i].firstname, result[i].lastname, result[i].email, result[i].password]);
+    		tomb.push([result[i].firstname, result[i].lastname, result[i].email, result[i].password, result[i].instrument]);
 		}
 
 		res.render('adatbazis', { user: tomb });
@@ -139,6 +140,6 @@ app.get('/profile', function (req, res) {
 });
 
 app.listen(3000, function () {
-	maindb.query("CREATE TABLE if not exists user (firstname TEXT, lastname TEXT, email TEXT, password TEXT)", null, [[]])
+	maindb.query("CREATE TABLE if not exists user (firstname TEXT, lastname TEXT, email TEXT, password TEXT, instrument TEXT)", null, [[]])
 	console.log('Example app listening on port 3000!')
 })

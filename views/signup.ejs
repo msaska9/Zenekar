@@ -1,18 +1,48 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>Login</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <LINK href="styles.css" rel="stylesheet" type="text/css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 	</head>
 	
 	<body>
+	<div class="container">
+		<h1>Regisztrálás</h1>
 		<form method="POST" action="http://localhost:3000/signup">
-			First name:
-			<br><input type="text" name="firstname"><br>  
-			Last name:
-			<br><input type="text" name="lastname"><br>
-			Email<br><input type="text" name="email"><br>
-			Password<br><input type="password" name="pw"><br><br>
-			<input type="submit" value="Submit">
+		
+		<table class="table">
+			<tbody>
+				<tr>
+					<td style="text-align: right;">First name: </td>
+					<td><input type="text" name="firstname"></td>
+				</tr>
+				<tr>
+					<td style="text-align: right;">Last name: </td>
+					<td><input type="text" name="lastname"></td>
+				</tr>
+				<tr>
+					<td style="text-align: right;">Email: </td>
+					<td><input type="text" name="email"></td>
+				</tr>
+				<tr>
+					<td style="text-align: right;">Password: </td>
+					<td><input type="password" name="pw"></td>
+				</tr>
+			</tbody>
+		</table>
+		<div>
+			<input type="submit" class="btn btn-info" value="Sign up">
+		</div>
 		</form>
+		<p>
+		Already have an account? Log in <a href="signin">here</a>.
+		</p>
+	</div>
 	</body>
 </html>
+
