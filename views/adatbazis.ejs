@@ -1,13 +1,40 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>Adatbázis</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <LINK href="styles.css" rel="stylesheet" type="text/css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 	</head>
 		
-	<body>
-		<ul>
-			<li>asd asd asd@asd.asd 4cfdc2e157eefe6facb983b1d557b3a1</li>
-			<li>kek kek kek 4cfdc2e157eefe6facb983b1d557b3a1</li>
-		</ul>
+	<body style="background-color:green;">
+	
+	<div class="container">      
+		<h1>User tábla tartalma</h1>	
+		<table class="table table-bordered">
+			<thead>
+				<tr class="warning">
+					<th>Firstname</th>
+					<th>Lastname</th>
+					<th>Email</th>
+				</tr>
+			</thead>
+			<tbody>
+				<% for(var i=0; i<user.length; i++) {%>
+					<tr class="info">
+					<% for(var j=0; j<user[i].length-1; j++) {%>
+						<td>
+						<%= user[i][j] %>
+						</td>
+					<% } %>
+					</tr>
+				<% } %>
+			</tbody>
+		</table>
+	</div>
+	
 	</body>
 </html>

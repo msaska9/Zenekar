@@ -122,7 +122,7 @@ app.get('/adatbazis', function (req, res) {
 
 	maindb.query("SELECT * FROM user", function (err, result) {
 		for (var i = 0; i < result.length; i++) {
-    		tomb.push(result[i].firstname + " " + result[i].lastname + " " + result[i].email + " " + result[i].password);
+    		tomb.push([result[i].firstname, result[i].lastname, result[i].email, result[i].password]);
 		}
 
 		res.render('adatbazis', { user: tomb });
@@ -130,6 +130,11 @@ app.get('/adatbazis', function (req, res) {
 });
 
 app.get('/profile', function (req, res) {
+	if (!req.user) { // a user be van jelentkezve, van joga látni a titkos oldalt
+		console.log('user is not logged in');
+		res.redirect('/signin'); // átirányítjuk a bejelentkezéshez
+		return;
+	}
 	res.render('profil', { userdata: req.user });
 });
 
