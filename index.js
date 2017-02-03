@@ -81,7 +81,7 @@ function checkLogin(req, res, next) { // a saját checkLogin middleware függvé
 		res.redirect('/profile'); // átirányítjuk a titkos oldalra
 	} else { // a user nincs bejelentkezve
   		console.log('user is not logged in');
-		res.redirect('/signin'); // átirányítjuk a bejelentkezéshez
+		res.redirect('/homepage'); // átirányítjuk a főoldalra
 	}
 
 	next();
@@ -108,7 +108,7 @@ app.post('/signup', function (req, res) {
 	adat.email = req.body.email;
 	adat.pw = req.body.pw;
 	adat.pw = md5(adat.pw);
-	adat.instrument = "zongora";
+	adat.instrument = req.body.instrument;
 
 	maindb.query("INSERT INTO user (firstname, lastname, email, password, instrument) VALUES (?, ?, ?, ?, ?)", function (err, result) {
 		res.render('signin');
@@ -137,6 +137,10 @@ app.get('/profile', function (req, res) {
 		return;
 	}
 	res.render('profil', { userdata: req.user });
+});
+
+app.get('/homepage', function (req, res) {
+	res.render('homepage');
 });
 
 app.listen(3000, function () {

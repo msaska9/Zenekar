@@ -20,12 +20,14 @@
 					<th>Firstname</th>
 					<th>Lastname</th>
 					<th>Email</th>
+					<th>Password</th>
+					<th>Instrument</th>
 				</tr>
 			</thead>
 			<tbody>
 				<% for(var i=0; i<user.length; i++) {%>
 					<tr class="info">
-					<% for(var j=0; j<user[i].length-2; j++) {%>
+					<% for(var j=0; j<user[i].length; j++) {%>
 						<td>
 						<%= user[i][j] %>
 						</td>
