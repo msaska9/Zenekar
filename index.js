@@ -5,6 +5,9 @@ app.set('view engine', 'ejs');
 
 // REQUIRE
 
+// Globális változók
+var number_of_teams=0;
+
 // adatbazis
 var dbapi = require('./db.js'); // api
 var maindb = new dbapi.database("mydb.db"); // adatbazis fajlban
@@ -101,6 +104,18 @@ app.get('/signup', function (req, res) {
 var auth = passport.authenticate('local', { successRedirect: '/', failureRedirect: '/signin' });
 app.post('/signin', auth);
 
+function matching(new_email, new_instrument) {
+	console.log('Matching');
+	maindb.query("SELECT * FROM user WHERE instrument!=? AND team=0", function (err, result) {		//Kinek van nem ilyen hangszere?
+		if(result.length>0) {
+				maindb.query("UPDATE user SET team=? WHERE email=? OR email=?", function (err1, result1) {
+					number_of_teams++;
+				}, [[number_of_teams+1, new_email, result[0].email]]);
+		}
+	}, [[new_instrument]]);
+	
+};
+
 app.post('/signup', function (req, res) {
 	var adat = Object();
 	adat.firstname = req.body.firstname;
@@ -109,10 +124,13 @@ app.post('/signup', function (req, res) {
 	adat.pw = req.body.pw;
 	adat.pw = md5(adat.pw);
 	adat.instrument = req.body.instrument;
+	adat.team = 0;
+	adat.answer_status = 0;
 
-	maindb.query("INSERT INTO user (firstname, lastname, email, password, instrument) VALUES (?, ?, ?, ?, ?)", function (err, result) {
+	maindb.query("INSERT INTO user (firstname, lastname, email, password, instrument, team, answer_status) VALUES (?, ?, ?, ?, ?, ?, ?)", function (err, result) {
+		matching(adat.email, adat.instrument);
 		res.render('signin');
-	}, [[adat.firstname, adat.lastname, adat.email, adat.pw, adat.instrument]]);
+	}, [[adat.firstname, adat.lastname, adat.email, adat.pw, adat.instrument, adat.team, adat.answer_status]]);
 });
 
 
@@ -123,20 +141,38 @@ app.get('/adatbazis', function (req, res) {
 
 	maindb.query("SELECT * FROM user", function (err, result) {
 		for (var i = 0; i < result.length; i++) {
-    		tomb.push([result[i].firstname, result[i].lastname, result[i].email, result[i].password, result[i].instrument]);
+    		tomb.push([result[i].firstname, result[i].lastname, result[i].email, result[i].password, result[i].instrument, result[i].team, result[i].answer_status]);
 		}
-
-		res.render('adatbazis', { user: tomb });
+		res.render('adatbazis', { POSTuser: tomb });
 	}, [[]]);
 });
 
 app.get('/profile', function (req, res) {
-	if (!req.user) { // a user be van jelentkezve, van joga látni a titkos oldalt
+	if (!req.user) { // a user nincs bejelentkezve
 		console.log('user is not logged in');
 		res.redirect('/signin'); // átirányítjuk a bejelentkezéshez
 		return;
 	}
-	res.render('profil', { userdata: req.user });
+	res.render('profil', { POSTuserdata: req.user });
+});
+
+app.get('/ertesites', function (req, res) {
+	if (!req.user) { // a user nincs bejelentkezve
+		console.log('user is not logged in');
+		res.redirect('/signin'); // átirányítjuk a bejelentkezéshez
+		return;
+	}
+	//tegok kikeresése
+	var team_members = Array();
+	maindb.query("SELECT * FROM user WHERE team=? AND team!=0", function (err, result) {
+		var teamstatus=1;	//-1 ha van -1   |||   1, ha mindegyik 1   |||   különben 0
+		for(var i=0; i<result.length; i++) {
+			team_members.push([result[i].firstname, result[i].lastname, result[i].email, result[i].instrument, result[i].answer_status]);
+			if(result[i].answer_status==-1) teamstatus=-1;		//ha van -1, akkor örök -1
+			else if(result[i].answer_status==0 && teamstatus==1) teamstatus=0;	//ha 0 a status valakinél és nincs -1, akkor teamstatus=0
+		}
+		res.render('ertesites', { POSTmembers: team_members, POSTteamstatus: teamstatus});
+	}, [[req.user.team]]);
 });
 
 app.get('/homepage', function (req, res) {
@@ -144,6 +180,6 @@ app.get('/homepage', function (req, res) {
 });
 
 app.listen(3000, function () {
-	maindb.query("CREATE TABLE if not exists user (firstname TEXT, lastname TEXT, email TEXT, password TEXT, instrument TEXT)", null, [[]])
+	maindb.query("CREATE TABLE if not exists user (firstname TEXT, lastname TEXT, email TEXT, password TEXT, instrument TEXT, team INTEGER, answer_status INTEGER)", null, [[]])
 	console.log('Example app listening on port 3000!')
 })

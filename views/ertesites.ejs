@@ -19,17 +19,35 @@
                 <a href="lista"><button type="button" class="btn btn-default ful">LIST</button></a>
             </div>
         </nav>
-        <div class="container mindegy">
-            <div class="row">
-                <div class="col-md-8 kiskutya" style="text-align: left;">
-                    <h1><%=POSTuserdata.lastname%> <%=POSTuserdata.firstname%></h1>
-                    <h2><%=POSTuserdata.email%></h2>
-                    <h2><%=POSTuserdata.instrument%></h2>
-                </div>
-                <div class="col-md-4">
-                    <img src="profilkep1.png" alt="hamis profilkép">
-                </div>
-            </div>
+        <div class="container">
+			<h2>Csoport</h2>
+			<% if(POSTmembers.length==0) {%>
+				<p>Sajnos még nincs csapatod.</p>
+			<%} else {%>
+            <p>Tagok:</p>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Firstname</th>
+                        <th>Lastname</th>
+                        <th>Email</th>
+						<th>Instrument</th>
+						<th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+					<% for(var i=0; i<POSTmembers.length; i++) { %>
+						<tr>
+							<% for(var j=0; j<POSTmembers[i].length; j++) { %>
+								<td>
+									<%=POSTmembers[i][j]%>
+								</td>
+							<% } %>
+						</tr>
+					<% } %>
+                </tbody>
+            </table>
+			<% } %>
         </div>
     </body>
 

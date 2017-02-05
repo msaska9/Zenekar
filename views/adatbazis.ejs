@@ -22,14 +22,16 @@
 					<th>Email</th>
 					<th>Password</th>
 					<th>Instrument</th>
+					<th>Team</th>
+					<th>Answer status</th>
 				</tr>
 			</thead>
 			<tbody>
-				<% for(var i=0; i<user.length; i++) {%>
+				<% for(var i=0; i<POSTuser.length; i++) {%>
 					<tr class="info">
-					<% for(var j=0; j<user[i].length; j++) {%>
+					<% for(var j=0; j<POSTuser[i].length; j++) {%>
 						<td>
-						<%= user[i][j] %>
+						<%= POSTuser[i][j] %>
 						</td>
 					<% } %>
 					</tr>
