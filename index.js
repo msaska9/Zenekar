@@ -171,8 +171,28 @@ app.get('/ertesites', function (req, res) {
 			if(result[i].answer_status==-1) teamstatus=-1;		//ha van -1, akkor örök -1
 			else if(result[i].answer_status==0 && teamstatus==1) teamstatus=0;	//ha 0 a status valakinél és nincs -1, akkor teamstatus=0
 		}
-		res.render('ertesites', { POSTmembers: team_members, POSTteamstatus: teamstatus});
+		res.render('ertesites', { POSTmembers: team_members, POSTteamstatus: teamstatus, POSTcurrent_user: req.user});
 	}, [[req.user.team]]);
+});
+
+app.post('/ertesites', function (req, res) {
+	var decision = req.body.answer;
+	//Kikeressük, hogy tényleg nem válaszolt-e még.
+	maindb.query("SELECT * FROM user WHERE email=?", function (err1, result1) {
+		if(result1[0].answer_status!=0) {
+			//Már válaszolt
+			res.redirect('/ertesites');
+			return;	
+		}
+		//még nem válaszolt
+		var status_number;
+		if(decision=="Accept") status_number=1;
+		else if(decision=="Refuse") status_number=-1;
+		maindb.query("UPDATE user SET answer_status=? WHERE email=?", function (err, result) {
+			req.user.answer_status=status_number;
+			res.redirect('/ertesites');
+		}, [[status_number, req.user.email]]);	
+	}, [[req.user.email]]);
 });
 
 app.get('/homepage', function (req, res) {

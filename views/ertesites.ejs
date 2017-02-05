@@ -2,13 +2,16 @@
 <html>
 
     <head>
-        <title>Kezdőlap</title>
+        <title>Notifications</title>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
         <LINK href="styles.css" rel="stylesheet" type="text/css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css">
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/i18n/defaults-*.min.js"></script>
     </head>
 
     <body style="background-color:powderblue;">
@@ -25,8 +28,8 @@
 				<p>Sajnos még nincs csapatod.</p>
 			<%} else {%>
             <p>Tagok:</p>
-            <table class="table">
-                <thead>
+            <table class="table table-bordered">
+                <thead class="active">
                     <tr>
                         <th>Firstname</th>
                         <th>Lastname</th>
@@ -36,8 +39,13 @@
                     </tr>
                 </thead>
                 <tbody>
+					<% var stilus_tipus; 
+					if(POSTteamstatus==-1) stilus_tipus="danger";
+					if(POSTteamstatus==0) stilus_tipus="warning";
+					if(POSTteamstatus==1) stilus_tipus="success";
+					%>
 					<% for(var i=0; i<POSTmembers.length; i++) { %>
-						<tr>
+						<tr class="<%=stilus_tipus%>">
 							<% for(var j=0; j<POSTmembers[i].length; j++) { %>
 								<td>
 									<%=POSTmembers[i][j]%>
@@ -47,6 +55,17 @@
 					<% } %>
                 </tbody>
             </table>
+				<% if(POSTcurrent_user.answer_status==0) { %>
+					<form method="POST" action="http://localhost:3000/ertesites">
+					<select class="selectpicker" name="answer">
+						<option>Accept</option>
+						<option>Refuse</option>
+					</select>
+					<div>
+						<input type="submit" class="btn btn-info" value="Submit">
+					</div>
+					</form>
+				<% } %>
 			<% } %>
         </div>
     </body>
