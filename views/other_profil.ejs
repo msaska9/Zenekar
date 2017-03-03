@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title>Kezdőlap</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <LINK href="../styles.css" rel="stylesheet" type="text/css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    </head>
+
+    <body style="background-color:powderblue;">
+        <nav class="navbar navbar-inverse">
+            <div class="fulek">
+                <a href="../ertesites"><button type="button" class="btn btn-default ful">NOTIFICATIONS</button></a>
+                <a href="../profile"><button type="button" class="btn btn-default ful">PROFILE</button></a>
+                <a href="../lista"><button type="button" class="btn btn-default ful">LIST</button></a>
+            </div>
+        </nav>
+        <div class="container mindegy">
+            <div class="row">
+                <div class="col-md-8 kiskutya" style="text-align: left;">
+                    <h1><%=POSTuserdata.lastname%> <%=POSTuserdata.firstname%></h1>
+                    <h2><%=POSTuserdata.email%></h2>
+                    <h2><%=POSTuserdata.instrument%></h2>
+                </div>
+                <div class="col-md-4">
+                    <img src="../profilkep1.png" alt="hamis profilkép">
+                </div>
+            </div>
+        </div>
+    </body>
+
+</html>

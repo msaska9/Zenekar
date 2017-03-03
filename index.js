@@ -6,7 +6,7 @@ app.set('view engine', 'ejs');
 // REQUIRE
 
 // Globális változók
-var number_of_teams=0;
+//var number_of_teams=0;
 
 // adatbazis
 var dbapi = require('./db.js'); // api
@@ -107,11 +107,13 @@ app.post('/signin', auth);
 function matching(new_email, new_instrument) {
 	console.log('Matching');
 	maindb.query("SELECT * FROM user WHERE instrument!=? AND team=0", function (err, result) {		//Kinek van nem ilyen hangszere?
-		if(result.length>0) {
+		maindb.query("SELECT team FROM user ORDER BY 1 DESC LIMIT 1", function (err2, result2) {			//Legnagyobb team lekérdezése
+			var number_of_teams = result2[0].team;
+			if(result.length>0) {
 				maindb.query("UPDATE user SET team=? WHERE email=? OR email=?", function (err1, result1) {
-					number_of_teams++;
 				}, [[number_of_teams+1, new_email, result[0].email]]);
-		}
+			}
+		}, [[]]);
 	}, [[new_instrument]]);
 	
 };
@@ -144,6 +146,21 @@ app.get('/adatbazis', function (req, res) {
     		tomb.push([result[i].firstname, result[i].lastname, result[i].email, result[i].password, result[i].instrument, result[i].team, result[i].answer_status]);
 		}
 		res.render('adatbazis', { POSTuser: tomb });
+	}, [[]]);
+});
+
+app.get('/lista', function (req, res) {
+	if (!req.user) { // a user nincs bejelentkezve
+		console.log('user is not logged in');
+		res.redirect('/signin'); // átirányítjuk a bejelentkezéshez
+		return;
+	}
+	var tomb = Array();
+	maindb.query("SELECT * FROM user", function (err, result) {
+		for (var i = 0; i < result.length; i++) {
+    		tomb.push([result[i].firstname, result[i].lastname, result[i].email, result[i].instrument, result[i].team]);
+		}
+		res.render('list', { POSTuser: tomb });
 	}, [[]]);
 });
 
@@ -199,7 +216,21 @@ app.get('/homepage', function (req, res) {
 	res.render('homepage');
 });
 
+app.get('/user/:user_lastname', function (req, res) {
+	var userdata = Object();
+	maindb.query("SELECT * FROM user WHERE lastname=?", function (err, result) {
+		for (var i = 0; i < result.length; i++) {
+			userdata.firstname=result[i].firstname;
+    		userdata.lastname=result[i].lastname;
+			userdata.instrument=result[i].instrument;
+			userdata.email=result[i].email;
+		}
+		res.render('other_profil', { POSTuserdata: userdata });
+	}, [[req.params.user_lastname]]);
+});
+
 app.listen(3000, function () {
-	maindb.query("CREATE TABLE if not exists user (firstname TEXT, lastname TEXT, email TEXT, password TEXT, instrument TEXT, team INTEGER, answer_status INTEGER)", null, [[]])
-	console.log('Example app listening on port 3000!')
+	maindb.query("CREATE TABLE if not exists user (firstname TEXT, lastname TEXT, email TEXT, password TEXT, instrument TEXT, team INTEGER, answer_status INTEGER)", null, [[]]);
+	console.log('Example app listening on port 3000!');
+	
 })
