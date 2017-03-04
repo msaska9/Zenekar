@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title>List</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <LINK href="styles.css" rel="stylesheet" type="text/css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/i18n/defaults-*.min.js"></script>
+    </head>
+
+    <body style="background-color:powderblue;">
+        <nav class="navbar navbar-inverse">
+            <div class="fulek">
+                <a href="ertesites"><button type="button" class="btn btn-default ful">NOTIFICATIONS</button></a>
+                <a href="profile"><button type="button" class="btn btn-default ful">PROFILE</button></a>
+                <a href="lista"><button type="button" class="btn btn-default ful">LIST</button></a>
+            </div>
+        </nav>
+        <div class="container">
+            <h1>User tábla tartalma</h1>
+            <table class="table table-bordered">
+                <thead>
+                    <tr class="warning">
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Instrument</th>
+                        <th>Team</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% for(var i=0; i<POSTuser.length; i++) {%>
+                        <tr class="info">
+                            <td>
+                                <a href='/user/<%= POSTuser[i][1] %>'>
+                                <%= POSTuser[i][1] %>
+                                <%= POSTuser[i][0] %>
+                                </a>
+                            </td>
+                            <% for(var j=2; j<POSTuser[i].length; j++) {%>
+                                <td>
+                                    <% if(j==4){%>
+                                        <% if(POSTuser[i][j]>0) {%>
+                                            VAN
+                                        <% } else {%>
+                                            NINCS
+                                        <% } %>   
+                                    <%} else {%>
+                                        <%= POSTuser[i][j] %>
+                                    <% } %>
+                                </td>
+                            <% } %>
+                        </tr>
+                        <% } %>
+                </tbody>
+            </table>
+        </div>
+    </body>
+
+</html>
