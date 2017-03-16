@@ -64,7 +64,7 @@ passport.use(new LocalStrategy(
 					return done(null, user); // továbbküldjük a user változót
 				}
 		  	}
-    	}, [[username]])
+    	}, [[username]]);
   }
 ));
 
@@ -126,13 +126,16 @@ app.post('/signup', function (req, res) {
 	adat.pw = req.body.pw;
 	adat.pw = md5(adat.pw);
 	adat.instrument = req.body.instrument;
+	adat.megye = req.body.megye;
+	adat.stilus = req.body.stilus;
+	adat.tudasszint = req.body.tudasszint;
 	adat.team = 0;
 	adat.answer_status = 0;
 
-	maindb.query("INSERT INTO user (firstname, lastname, email, password, instrument, team, answer_status) VALUES (?, ?, ?, ?, ?, ?, ?)", function (err, result) {
+	maindb.query("INSERT INTO user (firstname, lastname, email, password, instrument, megye, stilus, tudasszint, team, answer_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", function (err, result) {
 		matching(adat.email, adat.instrument);
 		res.render('signin');
-	}, [[adat.firstname, adat.lastname, adat.email, adat.pw, adat.instrument, adat.team, adat.answer_status]]);
+	}, [[adat.firstname, adat.lastname, adat.email, adat.pw, adat.instrument, adat.megye, adat.stilus, adat.tudasszint,  adat.team, adat.answer_status]]);
 });
 
 
@@ -143,7 +146,7 @@ app.get('/adatbazis', function (req, res) {
 
 	maindb.query("SELECT * FROM user", function (err, result) {
 		for (var i = 0; i < result.length; i++) {
-    		tomb.push([result[i].firstname, result[i].lastname, result[i].email, result[i].password, result[i].instrument, result[i].team, result[i].answer_status]);
+    		tomb.push([result[i].firstname, result[i].lastname, result[i].email, result[i].password, result[i].instrument, result[i].megye, result[i].stilus, result[i].tudasszint, result[i].team, result[i].answer_status]);
 		}
 		res.render('adatbazis', { POSTuser: tomb });
 	}, [[]]);
@@ -158,7 +161,7 @@ app.get('/lista', function (req, res) {
 	var tomb = Array();
 	maindb.query("SELECT * FROM user", function (err, result) {
 		for (var i = 0; i < result.length; i++) {
-    		tomb.push([result[i].firstname, result[i].lastname, result[i].email, result[i].instrument, result[i].team]);
+    		tomb.push([result[i].firstname, result[i].lastname, result[i].email, result[i].instrument, result[i].megye, result[i].stilus, result[i].tudasszint, result[i].team]);
 		}
 		res.render('list', { POSTuser: tomb });
 	}, [[]]);
@@ -184,7 +187,7 @@ app.get('/ertesites', function (req, res) {
 	maindb.query("SELECT * FROM user WHERE team=? AND team!=0", function (err, result) {
 		var teamstatus=1;	//-1 ha van -1   |||   1, ha mindegyik 1   |||   különben 0
 		for(var i=0; i<result.length; i++) {
-			team_members.push([result[i].firstname, result[i].lastname, result[i].email, result[i].instrument, result[i].answer_status]);
+			team_members.push([result[i].firstname, result[i].lastname, result[i].email, result[i].instrument, result[i].megye, result[i].stilus, result[i].tudasszint, result[i].answer_status]);
 			if(result[i].answer_status==-1) teamstatus=-1;		//ha van -1, akkor örök -1
 			else if(result[i].answer_status==0 && teamstatus==1) teamstatus=0;	//ha 0 a status valakinél és nincs -1, akkor teamstatus=0
 		}
@@ -225,12 +228,17 @@ app.get('/user/:user_lastname', function (req, res) {
 			userdata.instrument=result[i].instrument;
 			userdata.email=result[i].email;
 		}
+		if(req.user && userdata.email==req.user.email) {	//Ha be van jelentkezve ÉS a saját prolját nézi, akkor visszavisszük a profile-ra
+			res.redirect('/profile');
+			return;
+		}
+		//Ha nincs bejentkezve vagy nem a saját profilja.
 		res.render('other_profil', { POSTuserdata: userdata });
 	}, [[req.params.user_lastname]]);
 });
 
 app.listen(3000, function () {
-	maindb.query("CREATE TABLE if not exists user (firstname TEXT, lastname TEXT, email TEXT, password TEXT, instrument TEXT, team INTEGER, answer_status INTEGER)", null, [[]]);
+	maindb.query("CREATE TABLE if not exists user (firstname TEXT, lastname TEXT, email TEXT, password TEXT, instrument TEXT, megye TEXT, stilus TEXT, tudasszint TEXT, team INTEGER, answer_status INTEGER)", null, [[]]);
 	console.log('Example app listening on port 3000!');
 	
 })

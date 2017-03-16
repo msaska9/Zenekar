@@ -30,6 +30,9 @@
                         <th>Name</th>
                         <th>Email</th>
                         <th>Instrument</th>
+                        <th>Megye</th>
+                        <th>Stílus</th>
+                        <th>Tudásszint</th>
                         <th>Team</th>
                     </tr>
                 </thead>
@@ -44,7 +47,7 @@
                             </td>
                             <% for(var j=2; j<POSTuser[i].length; j++) {%>
                                 <td>
-                                    <% if(j==4){%>
+                                    <% if(j==7){%>
                                         <% if(POSTuser[i][j]>0) {%>
                                             VAN
                                         <% } else {%>
