@@ -23,6 +23,12 @@ var bodyParser = require('body-parser');
 
 var md5 = require('js-md5');
 
+// képfeltöltés
+var fs = require('fs');
+var multer = require('multer');
+var path = require('path');
+var upload = multer({ dest: 'uploads/' });
+
 // middleware config - parsers
 app.use(bodyParser());
 app.use(bodyParser.urlencoded({ // support URL-encoded bodies
@@ -38,6 +44,7 @@ app.use(session({
 
 app.use(passport.initialize());
 app.use(passport.session());
+
 
 
 // sajat stratégiank
@@ -132,10 +139,10 @@ app.post('/signup', function (req, res) {
 	adat.team = 0;
 	adat.answer_status = 0;
 
-	maindb.query("INSERT INTO user (firstname, lastname, email, password, instrument, megye, stilus, tudasszint, team, answer_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", function (err, result) {
+	maindb.query("INSERT INTO user (firstname, lastname, email, password, instrument, megye, stilus, tudasszint, team, answer_status, profilepicture) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", function (err, result) {
 		matching(adat.email, adat.instrument);
 		res.render('signin');
-	}, [[adat.firstname, adat.lastname, adat.email, adat.pw, adat.instrument, adat.megye, adat.stilus, adat.tudasszint,  adat.team, adat.answer_status]]);
+	}, [[adat.firstname, adat.lastname, adat.email, adat.pw, adat.instrument, adat.megye, adat.stilus, adat.tudasszint,  adat.team, adat.answer_status, 'images/default_picture.png']]);
 });
 
 
@@ -174,6 +181,23 @@ app.get('/profile', function (req, res) {
 		return;
 	}
 	res.render('profil', { POSTuserdata: req.user });
+});
+
+app.post('/upload', upload.single('avatar'), function (req, res, next) {
+	console.log(req.file);
+	var current_location = req.file.path;
+	var image_type = path.extname(req.file.originalname).toLowerCase();
+	var dest = "public/images/" + req.user.lastname + image_type;
+	var new_profilepicture = "images/" + req.user.lastname + image_type;
+	fs.rename(current_location, dest, function(err) {
+        if (err) throw err;
+        console.log("Upload completed!");
+		maindb.query("UPDATE user SET profilepicture=? WHERE email=?", function (err, result) {
+			req.user.profilepicture=new_profilepicture;
+			res.redirect('/profile'); // átirányítjuk a profilra
+		//	next();
+	}, [[new_profilepicture, req.user.email]]);
+    });
 });
 
 app.get('/ertesites', function (req, res) {
@@ -237,8 +261,28 @@ app.get('/user/:user_lastname', function (req, res) {
 	}, [[req.params.user_lastname]]);
 });
 
+
+/*app.post('/upload', function (req, res) {
+	console.log(req);
+    var tempPath = req.files.file.path;
+	var image_type = path.extname(req.files.file.name).toLowerCase();
+    var targetPath = path.resolve('/public/images/'+req.user.lastname+image_type); //KÉSŐBB id szerinti keresés
+    if (image_type === '.png' || image_type === '.jpg') {
+        fs.rename(tempPath, targetPath, function(err) {
+            if (err) throw err;
+            console.log("Upload completed!");
+        });
+    } else {
+        fs.unlink(tempPath, function () {
+            if (err) throw err;
+        });
+    }
+
+});*/
+
+
 app.listen(3000, function () {
-	maindb.query("CREATE TABLE if not exists user (firstname TEXT, lastname TEXT, email TEXT, password TEXT, instrument TEXT, megye TEXT, stilus TEXT, tudasszint TEXT, team INTEGER, answer_status INTEGER)", null, [[]]);
+	maindb.query("CREATE TABLE if not exists user (firstname TEXT, lastname TEXT, email TEXT, password TEXT, instrument TEXT, megye TEXT, stilus TEXT, tudasszint TEXT, team INTEGER, answer_status INTEGER, profilepicture TEXT)", null, [[]]);
 	console.log('Example app listening on port 3000!');
 	
 })

@@ -30,10 +30,15 @@
                     <h2><%=POSTuserdata.tudasszint%></h2>
                 </div>
                 <div class="col-md-4">
-                    <img src="profilkep1.png" alt="hamis profilkép">
+                    <h2><%=POSTuserdata.profilepicture%></h2>
+                    <img src="<%=POSTuserdata.profilepicture%>" alt="hamis profilkép">
                 </div>
             </div>
         </div>
+        <form method="post" enctype="multipart/form-data" action="/upload">
+            <input type="file" name="avatar">
+            <input type="submit" value="Submit">
+        </form>
     </body>
 
 </html>
