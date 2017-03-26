@@ -145,7 +145,6 @@ app.post('/signup', function (req, res) {
 	}, [[adat.firstname, adat.lastname, adat.email, adat.pw, adat.instrument, adat.megye, adat.stilus, adat.tudasszint,  adat.team, adat.answer_status, 'images/default_picture.png']]);
 });
 
-
 app.get('/', checkLogin); // használjuk a middlewaret, ha a /-re jön egy request
 
 app.get('/adatbazis', function (req, res) {
@@ -251,6 +250,10 @@ app.get('/user/:user_lastname', function (req, res) {
     		userdata.lastname=result[i].lastname;
 			userdata.instrument=result[i].instrument;
 			userdata.email=result[i].email;
+			userdata.profilepicture=result[i].profilepicture;
+			userdata.megye=result[i].megye;
+			userdata.stilus=result[i].stilus;
+			userdata.tudasszint=result[i].tudasszint;
 		}
 		if(req.user && userdata.email==req.user.email) {	//Ha be van jelentkezve ÉS a saját prolját nézi, akkor visszavisszük a profile-ra
 			res.redirect('/profile');
@@ -260,26 +263,6 @@ app.get('/user/:user_lastname', function (req, res) {
 		res.render('other_profil', { POSTuserdata: userdata });
 	}, [[req.params.user_lastname]]);
 });
-
-
-/*app.post('/upload', function (req, res) {
-	console.log(req);
-    var tempPath = req.files.file.path;
-	var image_type = path.extname(req.files.file.name).toLowerCase();
-    var targetPath = path.resolve('/public/images/'+req.user.lastname+image_type); //KÉSŐBB id szerinti keresés
-    if (image_type === '.png' || image_type === '.jpg') {
-        fs.rename(tempPath, targetPath, function(err) {
-            if (err) throw err;
-            console.log("Upload completed!");
-        });
-    } else {
-        fs.unlink(tempPath, function () {
-            if (err) throw err;
-        });
-    }
-
-});*/
-
 
 app.listen(3000, function () {
 	maindb.query("CREATE TABLE if not exists user (firstname TEXT, lastname TEXT, email TEXT, password TEXT, instrument TEXT, megye TEXT, stilus TEXT, tudasszint TEXT, team INTEGER, answer_status INTEGER, profilepicture TEXT)", null, [[]]);
