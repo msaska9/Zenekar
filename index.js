@@ -5,12 +5,12 @@ app.set('view engine', 'ejs');
 
 // REQUIRE
 
-// Globális változók
+// Global variables
 //var number_of_teams=0;
 
-// adatbazis
+// database
 var dbapi = require('./db.js'); // api
-var maindb = new dbapi.database("mydb.db"); // adatbazis fajlban
+var maindb = new dbapi.database("mydb.db"); // database in file
 
 // passport
 var passport = require('passport');
@@ -23,7 +23,7 @@ var bodyParser = require('body-parser');
 
 var md5 = require('js-md5');
 
-// képfeltöltés
+// image uploading
 var fs = require('fs');
 var multer = require('multer');
 var path = require('path');
@@ -47,20 +47,20 @@ app.use(passport.session());
 
 
 
-// sajat stratégiank
-// a bejelentkezes e-maillel es jelszoval tortenik
+// Saját stratégiánk
+// Bejentkezés password-del és emaillel működik
 passport.use(new LocalStrategy(
-	// kulon megmondjuk, hogy mik a fieldeink
+	// külön megmondjuk, hogy mik a fieldeink
 	{
 		usernameField: 'email', 
 		passwordField: 'password',
-	}, function (username, password, done) { // a strategia fuggvenye
+	}, function (username, password, done) { // a stratégia függvénye
 		maindb.query("SELECT * FROM user WHERE email=?", function (err, result) {
-			if ( result.length == 0 ) { // ha nem talaltunk usert
+			if ( result.length == 0 ) { // ha nem találtunk usert
 				console.log('No such user'); 
 				return done(null, false);
 		  	} else {
-				var user = result[0]; // eltaroljuk a user adatait
+				var user = result[0]; // eltároljuk a user adatait
 				if ( md5(password) != user.password ) { // ha rossz a jelszó
 					console.log('Bad password');
 					return done(null, false); // ezt a függvényt kell hívni a dokumentáció szerint
@@ -75,12 +75,12 @@ passport.use(new LocalStrategy(
   }
 ));
 
-// user hozzaadasa a sessionbe
+// User hozzáadása a sessionbe
 passport.serializeUser(function (user, done) {
 	done(null, user); // user elmentése
 });
 
-// user torlese a sessionbol
+// User törlése a sessionből
 passport.deserializeUser(function (user, done) {
 	done(null, user);
 });
@@ -107,18 +107,19 @@ app.get('/signup', function (req, res) {
 	res.render('signup');
 });
 
-// ez a passport middleware fuggvenye a bejelentkezeshez
+// Ez a passport middleware függvénye a bejelentkezéshez
 var auth = passport.authenticate('local', { successRedirect: '/', failureRedirect: '/signin' });
 app.post('/signin', auth);
 
+// Összepárosító függvény
 function matching(new_email, new_instrument) {
 	console.log('Matching');
 	maindb.query("SELECT * FROM user WHERE instrument!=? AND team=0", function (err, result) {		//Kinek van nem ilyen hangszere?
 		maindb.query("SELECT team FROM user ORDER BY 1 DESC LIMIT 1", function (err2, result2) {			//Legnagyobb team lekérdezése
 			var number_of_teams = result2[0].team;
-			if(result.length>0) {
+			if(result.length>0) { //Van-e eredmény?
 				maindb.query("UPDATE user SET team=? WHERE email=? OR email=?", function (err1, result1) {
-				}, [[number_of_teams+1, new_email, result[0].email]]);
+				}, [[number_of_teams+1, new_email, result[0].email]]);	//"team"-t beállítjuk a két emberünknek
 			}
 		}, [[]]);
 	}, [[new_instrument]]);
@@ -126,50 +127,52 @@ function matching(new_email, new_instrument) {
 };
 
 app.post('/signup', function (req, res) {
-	var adat = Object();
-	adat.firstname = req.body.firstname;
-	adat.lastname = req.body.lastname;
-	adat.email = req.body.email;
-	adat.pw = req.body.pw;
-	adat.pw = md5(adat.pw);
-	adat.instrument = req.body.instrument;
-	adat.megye = req.body.megye;
-	adat.stilus = req.body.stilus;
-	adat.tudasszint = req.body.tudasszint;
-	adat.team = 0;
-	adat.answer_status = 0;
+	var data = Object();
+	data.firstname = req.body.firstname;
+	data.lastname = req.body.lastname;
+	data.email = req.body.email;
+	data.pw = req.body.pw;
+	data.pw = md5(data.pw);
+	data.instrument = req.body.instrument;
+	data.region = req.body.region;
+	data.genre = req.body.genre;
+	data.level = req.body.level;
+	data.team = 0;
+	data.answer_status = 0;
 
-	maindb.query("INSERT INTO user (firstname, lastname, email, password, instrument, megye, stilus, tudasszint, team, answer_status, profilepicture) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", function (err, result) {
-		matching(adat.email, adat.instrument);
-		res.render('signin');
-	}, [[adat.firstname, adat.lastname, adat.email, adat.pw, adat.instrument, adat.megye, adat.stilus, adat.tudasszint,  adat.team, adat.answer_status, 'images/default_picture.png']]);
+	//user adatatinak lementése az adatbázisba
+	maindb.query("INSERT INTO user (firstname, lastname, email, password, instrument, region, genre, level, team, answer_status, profilepicture) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", function (err, result) {
+		matching(data.email, data.instrument);
+		res.render('signin');	//átirányítjuk a signin-ra
+	}, [[data.firstname, data.lastname, data.email, data.pw, data.instrument, data.region, data.genre, data.level,  data.team, data.answer_status, 'images/default_picture.png']]);
 });
 
 app.get('/', checkLogin); // használjuk a middlewaret, ha a /-re jön egy request
 
-app.get('/adatbazis', function (req, res) {
-	var tomb = Array();
-
+app.get('/database', function (req, res) {
+	//lekérdezi az összes felhasználó adatait
+	var array = Array();
 	maindb.query("SELECT * FROM user", function (err, result) {
 		for (var i = 0; i < result.length; i++) {
-    		tomb.push([result[i].firstname, result[i].lastname, result[i].email, result[i].password, result[i].instrument, result[i].megye, result[i].stilus, result[i].tudasszint, result[i].team, result[i].answer_status]);
+    		array.push([result[i].firstname, result[i].lastname, result[i].email, result[i].password, result[i].instrument, result[i].region, result[i].genre, result[i].level, result[i].team, result[i].answer_status]);
 		}
-		res.render('adatbazis', { POSTuser: tomb });
+		res.render('database', { POSTuser: array });
 	}, [[]]);
 });
 
-app.get('/lista', function (req, res) {
+app.get('/list', function (req, res) {
 	if (!req.user) { // a user nincs bejelentkezve
 		console.log('user is not logged in');
 		res.redirect('/signin'); // átirányítjuk a bejelentkezéshez
 		return;
 	}
-	var tomb = Array();
+	//lekérdezi az összes felhasználó adatait
+	var array = Array();
 	maindb.query("SELECT * FROM user", function (err, result) {
 		for (var i = 0; i < result.length; i++) {
-    		tomb.push([result[i].firstname, result[i].lastname, result[i].email, result[i].instrument, result[i].megye, result[i].stilus, result[i].tudasszint, result[i].team]);
+    		array.push([result[i].firstname, result[i].lastname, result[i].email, result[i].instrument, result[i].region, result[i].genre, result[i].level, result[i].team]);
 		}
-		res.render('list', { POSTuser: tomb });
+		res.render('list', { POSTuser: array });
 	}, [[]]);
 });
 
@@ -179,18 +182,20 @@ app.get('/profile', function (req, res) {
 		res.redirect('/signin'); // átirányítjuk a bejelentkezéshez
 		return;
 	}
-	res.render('profil', { POSTuserdata: req.user });
+	res.render('profile', { POSTuserdata: req.user });
 });
 
 app.post('/upload', upload.single('avatar'), function (req, res, next) {
-	console.log(req.file);
-	var current_location = req.file.path;
-	var image_type = path.extname(req.file.originalname).toLowerCase();
-	var dest = "public/images/" + req.user.lastname + image_type;
-	var new_profilepicture = "images/" + req.user.lastname + image_type;
+	console.log(req.file); //feltöltött file adatai
+	var current_location = req.file.path; //a kép ideiglenes helyének elérési útja
+	var image_type = path.extname(req.file.originalname).toLowerCase(); //Kép típusa (pl. .jpg, .png, ...)
+	var dest = "public/images/" + req.user.lastname + image_type; 
+	var new_profilepicture = "images/" + req.user.lastname + image_type; //kép végleges helyének elérési úrja
+	//Kép áthelyezése ideiglenes helyről a végleges helyre
 	fs.rename(current_location, dest, function(err) {
         if (err) throw err;
         console.log("Upload completed!");
+		//adatbázis frissítése az új képpel
 		maindb.query("UPDATE user SET profilepicture=? WHERE email=?", function (err, result) {
 			req.user.profilepicture=new_profilepicture;
 			res.redirect('/profile'); // átirányítjuk a profilra
@@ -199,41 +204,41 @@ app.post('/upload', upload.single('avatar'), function (req, res, next) {
     });
 });
 
-app.get('/ertesites', function (req, res) {
+app.get('/notifications', function (req, res) {
 	if (!req.user) { // a user nincs bejelentkezve
 		console.log('user is not logged in');
 		res.redirect('/signin'); // átirányítjuk a bejelentkezéshez
 		return;
 	}
-	//tegok kikeresése
+	//tagok kikeresése
 	var team_members = Array();
 	maindb.query("SELECT * FROM user WHERE team=? AND team!=0", function (err, result) {
 		var teamstatus=1;	//-1 ha van -1   |||   1, ha mindegyik 1   |||   különben 0
 		for(var i=0; i<result.length; i++) {
-			team_members.push([result[i].firstname, result[i].lastname, result[i].email, result[i].instrument, result[i].megye, result[i].stilus, result[i].tudasszint, result[i].answer_status]);
+			team_members.push([result[i].firstname, result[i].lastname, result[i].email, result[i].instrument, result[i].region, result[i].genre, result[i].level, result[i].answer_status]);
 			if(result[i].answer_status==-1) teamstatus=-1;		//ha van -1, akkor örök -1
 			else if(result[i].answer_status==0 && teamstatus==1) teamstatus=0;	//ha 0 a status valakinél és nincs -1, akkor teamstatus=0
 		}
-		res.render('ertesites', { POSTmembers: team_members, POSTteamstatus: teamstatus, POSTcurrent_user: req.user});
+		res.render('notifications', { POSTmembers: team_members, POSTteamstatus: teamstatus, POSTcurrent_user: req.user});
 	}, [[req.user.team]]);
 });
 
-app.post('/ertesites', function (req, res) {
+app.post('/notifications', function (req, res) {
 	var decision = req.body.answer;
 	//Kikeressük, hogy tényleg nem válaszolt-e még.
 	maindb.query("SELECT * FROM user WHERE email=?", function (err1, result1) {
 		if(result1[0].answer_status!=0) {
 			//Már válaszolt
-			res.redirect('/ertesites');
+			res.redirect('/notifications');
 			return;	
 		}
-		//még nem válaszolt
+		//még nem válaszolt, válaszát beírjuk az adatbázisba
 		var status_number;
 		if(decision=="Accept") status_number=1;
 		else if(decision=="Refuse") status_number=-1;
 		maindb.query("UPDATE user SET answer_status=? WHERE email=?", function (err, result) {
 			req.user.answer_status=status_number;
-			res.redirect('/ertesites');
+			res.redirect('/notifications');
 		}, [[status_number, req.user.email]]);	
 	}, [[req.user.email]]);
 });
@@ -243,6 +248,7 @@ app.get('/homepage', function (req, res) {
 });
 
 app.get('/user/:user_lastname', function (req, res) {
+	//másik user adatainak lekérdezése
 	var userdata = Object();
 	maindb.query("SELECT * FROM user WHERE lastname=?", function (err, result) {
 		for (var i = 0; i < result.length; i++) {
@@ -251,21 +257,22 @@ app.get('/user/:user_lastname', function (req, res) {
 			userdata.instrument=result[i].instrument;
 			userdata.email=result[i].email;
 			userdata.profilepicture=result[i].profilepicture;
-			userdata.megye=result[i].megye;
-			userdata.stilus=result[i].stilus;
-			userdata.tudasszint=result[i].tudasszint;
+			userdata.region=result[i].region;
+			userdata.genre=result[i].genre;
+			userdata.level=result[i].level;
 		}
 		if(req.user && userdata.email==req.user.email) {	//Ha be van jelentkezve ÉS a saját prolját nézi, akkor visszavisszük a profile-ra
 			res.redirect('/profile');
 			return;
 		}
 		//Ha nincs bejentkezve vagy nem a saját profilja.
-		res.render('other_profil', { POSTuserdata: userdata });
+		res.render('other_profile', { POSTuserdata: userdata });
 	}, [[req.params.user_lastname]]);
 });
 
 app.listen(3000, function () {
-	maindb.query("CREATE TABLE if not exists user (firstname TEXT, lastname TEXT, email TEXT, password TEXT, instrument TEXT, megye TEXT, stilus TEXT, tudasszint TEXT, team INTEGER, answer_status INTEGER, profilepicture TEXT)", null, [[]]);
+	//Létrehozunk egy táblát, ha még nincs. (ha módosítottunk az adatbázisban, törölni kell azt!!!)
+	maindb.query("CREATE TABLE if not exists user (firstname TEXT, lastname TEXT, email TEXT, password TEXT, instrument TEXT, region TEXT, genre TEXT, level TEXT, team INTEGER, answer_status INTEGER, profilepicture TEXT)", null, [[]]);
 	console.log('Example app listening on port 3000!');
 	
 })

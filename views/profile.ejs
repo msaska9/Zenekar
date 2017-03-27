@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Band search</title>
+        <title>Band Search</title>
 
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -19,12 +19,12 @@
 			<div class="container-fluid">
 				<div class="navbar-header">
 					<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-						<span class="sr-only">Toggle navigation</span>
+						<span class="sr-only">Toggle Navigation</span>
 						<span class="icon-bar"></span>
 						<span class="icon-bar"></span>
 						<span class="icon-bar"></span>
 					</button>
-				<a class="navbar-brand" href="/">Band search</a>
+				<a class="navbar-brand" href="/">Band Search</a>
 				</div>
 
 				<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
@@ -37,18 +37,18 @@
 					</form>
 
 					<ul class="nav navbar-nav navbar-right">
-						<li><a href="/lista">List</a></li>
-						<li><a href="/ertesites">Notifications</a></li>
+						<li><a href="/list">List</a></li>
+						<li><a href="/notifications">Notifications</a></li>
 						<li class="dropdown">
 							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
 								&#8801
 								<span class="caret"></span>
 							</a>
 							<ul class="dropdown-menu">
-								<li><a href="#">My profile</a></li>
+								<li><a href="#">My Profile</a></li>
 								<li><a href="#">Settings</a></li>
 								<li role="separator" class="divider"></li>
-								<li><a href="#">Log out</a></li>
+								<li><a href="#">Log Out</a></li>
 							</ul>
 						</li>
 					</ul>
@@ -58,21 +58,24 @@
 
         <div class="container">
             <div class="row">
-                <div class="col-md-6 kiskutya" style="text-align: left;">
+                <div class="col-md-6" style="text-align: left;">
                     <h1><%=POSTuserdata.lastname%> <%=POSTuserdata.firstname%></h1>
                     <h2><%=POSTuserdata.email%></h2>
                     <h2><%=POSTuserdata.instrument%></h2>
-                    <h2><%=POSTuserdata.megye%></h2>
-                    <h2><%=POSTuserdata.stilus%></h2>
-                    <h2><%=POSTuserdata.tudasszint%></h2>
+                    <h2><%=POSTuserdata.region%></h2>
+                    <h2><%=POSTuserdata.genre%></h2>
+                    <h2><%=POSTuserdata.level%></h2>
  
                 </div>
                 <div class="col-md-6">
-                    <img src="../<%=POSTuserdata.profilepicture%>" alt="hamis profilkép"  style="width:300pt">
+                    <img src="<%=POSTuserdata.profilepicture%>" alt="No Image!" style="width:300pt; margin-bottom: 10pt">
+                    <form method="post" enctype="multipart/form-data" action="/upload">
+                        <input type="file" name="avatar" style="margin-bottom: 5pt">
+                        <input type="submit" value="Submit" class="btn btn-default">
+                    </form>
                 </div>
             </div>
         </div>
-
     </body>
 
 </html>
