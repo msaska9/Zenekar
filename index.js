@@ -46,7 +46,6 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 
-
 // Saját stratégiánk
 // Bejentkezés password-del és emaillel működik
 passport.use(new LocalStrategy(
@@ -131,6 +130,7 @@ app.post('/signup', function (req, res) {
 	data.firstname = req.body.firstname;
 	data.lastname = req.body.lastname;
 	data.email = req.body.email;
+	data.nickname = req.body.nickname;
 	data.pw = req.body.pw;
 	data.pw = md5(data.pw);
 	data.instrument = req.body.instrument;
@@ -141,10 +141,10 @@ app.post('/signup', function (req, res) {
 	data.answer_status = 0;
 
 	//user adatatinak lementése az adatbázisba
-	maindb.query("INSERT INTO user (firstname, lastname, email, password, instrument, region, genre, level, team, answer_status, profilepicture) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", function (err, result) {
+	maindb.query("INSERT INTO user (firstname, lastname, email, nickname, password, instrument, region, genre, level, team, answer_status, profilepicture) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", function (err, result) {
 		matching(data.email, data.instrument);
 		res.render('signin');	//átirányítjuk a signin-ra
-	}, [[data.firstname, data.lastname, data.email, data.pw, data.instrument, data.region, data.genre, data.level,  data.team, data.answer_status, 'images/default_picture.png']]);
+	}, [[data.firstname, data.lastname, data.email, data.nickname, data.pw, data.instrument, data.region, data.genre, data.level,  data.team, data.answer_status, 'images/default_picture.png']]);
 });
 
 app.get('/', checkLogin); // használjuk a middlewaret, ha a /-re jön egy request
@@ -154,7 +154,7 @@ app.get('/database', function (req, res) {
 	var array = Array();
 	maindb.query("SELECT * FROM user", function (err, result) {
 		for (var i = 0; i < result.length; i++) {
-    		array.push([result[i].firstname, result[i].lastname, result[i].email, result[i].password, result[i].instrument, result[i].region, result[i].genre, result[i].level, result[i].team, result[i].answer_status]);
+    		array.push([result[i].firstname, result[i].lastname, result[i].email, result[i].nickname, result[i].password, result[i].instrument, result[i].region, result[i].genre, result[i].level, result[i].team, result[i].answer_status]);
 		}
 		res.render('database', { POSTuser: array });
 	}, [[]]);
@@ -170,7 +170,7 @@ app.get('/list', function (req, res) {
 	var array = Array();
 	maindb.query("SELECT * FROM user", function (err, result) {
 		for (var i = 0; i < result.length; i++) {
-    		array.push([result[i].firstname, result[i].lastname, result[i].email, result[i].instrument, result[i].region, result[i].genre, result[i].level, result[i].team]);
+    		array.push([result[i].firstname, result[i].lastname, result[i].email, result[i].nickname, result[i].instrument, result[i].region, result[i].genre, result[i].level, result[i].team]);
 		}
 		res.render('list', { POSTuser: array });
 	}, [[]]);
@@ -215,7 +215,7 @@ app.get('/notifications', function (req, res) {
 	maindb.query("SELECT * FROM user WHERE team=? AND team!=0", function (err, result) {
 		var teamstatus=1;	//-1 ha van -1   |||   1, ha mindegyik 1   |||   különben 0
 		for(var i=0; i<result.length; i++) {
-			team_members.push([result[i].firstname, result[i].lastname, result[i].email, result[i].instrument, result[i].region, result[i].genre, result[i].level, result[i].answer_status]);
+			team_members.push([result[i].firstname, result[i].lastname, result[i].email, result[i].nickname, result[i].instrument, result[i].region, result[i].genre, result[i].level, result[i].answer_status]);
 			if(result[i].answer_status==-1) teamstatus=-1;		//ha van -1, akkor örök -1
 			else if(result[i].answer_status==0 && teamstatus==1) teamstatus=0;	//ha 0 a status valakinél és nincs -1, akkor teamstatus=0
 		}
@@ -256,6 +256,7 @@ app.get('/user/:user_lastname', function (req, res) {
     		userdata.lastname=result[i].lastname;
 			userdata.instrument=result[i].instrument;
 			userdata.email=result[i].email;
+			userdata.nickname=result[i].nickname;
 			userdata.profilepicture=result[i].profilepicture;
 			userdata.region=result[i].region;
 			userdata.genre=result[i].genre;
@@ -272,7 +273,7 @@ app.get('/user/:user_lastname', function (req, res) {
 
 app.listen(3000, function () {
 	//Létrehozunk egy táblát, ha még nincs. (ha módosítottunk az adatbázisban, törölni kell azt!!!)
-	maindb.query("CREATE TABLE if not exists user (firstname TEXT, lastname TEXT, email TEXT, password TEXT, instrument TEXT, region TEXT, genre TEXT, level TEXT, team INTEGER, answer_status INTEGER, profilepicture TEXT)", null, [[]]);
+	maindb.query("CREATE TABLE if not exists user (firstname TEXT, lastname TEXT, email TEXT, nickname TEXT, password TEXT, instrument TEXT, region TEXT, genre TEXT, level TEXT, team INTEGER, answer_status INTEGER, profilepicture TEXT)", null, [[]]);
 	console.log('Example app listening on port 3000!');
 	
 })
