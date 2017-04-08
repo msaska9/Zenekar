@@ -47,14 +47,14 @@ app.use(passport.session());
 
 
 // Saját stratégiánk
-// Bejentkezés password-del és emaillel működik
+// Bejentkezés password-del és nickname-mel működik
 passport.use(new LocalStrategy(
 	// külön megmondjuk, hogy mik a fieldeink
 	{
-		usernameField: 'email', 
+		usernameField: 'nickname', 
 		passwordField: 'password',
 	}, function (username, password, done) { // a stratégia függvénye
-		maindb.query("SELECT * FROM user WHERE email=?", function (err, result) {
+		maindb.query("SELECT * FROM user WHERE nickname=?", function (err, result) {
 			if ( result.length == 0 ) { // ha nem találtunk usert
 				console.log('No such user'); 
 				return done(null, false);
@@ -111,18 +111,18 @@ var auth = passport.authenticate('local', { successRedirect: '/', failureRedirec
 app.post('/signin', auth);
 
 // Összepárosító függvény
-function matching(new_email, new_instrument) {
+function matching(new_nickname, new_instrument) {
 	console.log('Matching');
 	maindb.query("SELECT * FROM user WHERE instrument!=? AND team=0", function (err, result) {		//Kinek van nem ilyen hangszere?
 		maindb.query("SELECT team FROM user ORDER BY 1 DESC LIMIT 1", function (err2, result2) {			//Legnagyobb team lekérdezése
 			var number_of_teams = result2[0].team;
 			if(result.length>0) { //Van-e eredmény?
-				maindb.query("UPDATE user SET team=? WHERE email=? OR email=?", function (err1, result1) {
-				}, [[number_of_teams+1, new_email, result[0].email]]);	//"team"-t beállítjuk a két emberünknek
+				maindb.query("UPDATE user SET team=? WHERE nickname=? OR nickname=?", function (err1, result1) {
+				}, [[number_of_teams+1, new_nickname, result[0].nickname]]);	//"team"-t beállítjuk a két emberünknek
 			}
 		}, [[]]);
 	}, [[new_instrument]]);
-	
+
 };
 
 app.post('/signup', function (req, res) {
@@ -142,7 +142,7 @@ app.post('/signup', function (req, res) {
 
 	//user adatatinak lementése az adatbázisba
 	maindb.query("INSERT INTO user (firstname, lastname, email, nickname, password, instrument, region, genre, level, team, answer_status, profilepicture) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", function (err, result) {
-		matching(data.email, data.instrument);
+		matching(data.nickname, data.instrument);
 		res.render('signin');	//átirányítjuk a signin-ra
 	}, [[data.firstname, data.lastname, data.email, data.nickname, data.pw, data.instrument, data.region, data.genre, data.level,  data.team, data.answer_status, 'images/default_picture.png']]);
 });
@@ -189,18 +189,18 @@ app.post('/upload', upload.single('avatar'), function (req, res, next) {
 	console.log(req.file); //feltöltött file adatai
 	var current_location = req.file.path; //a kép ideiglenes helyének elérési útja
 	var image_type = path.extname(req.file.originalname).toLowerCase(); //Kép típusa (pl. .jpg, .png, ...)
-	var dest = "public/images/" + req.user.lastname + image_type; 
-	var new_profilepicture = "images/" + req.user.lastname + image_type; //kép végleges helyének elérési úrja
+	var dest = "public/images/" + req.user.nickname + image_type;
+	var new_profilepicture = "images/" + req.user.nickname + image_type; //kép végleges helyének elérési úrja
 	//Kép áthelyezése ideiglenes helyről a végleges helyre
 	fs.rename(current_location, dest, function(err) {
         if (err) throw err;
         console.log("Upload completed!");
 		//adatbázis frissítése az új képpel
-		maindb.query("UPDATE user SET profilepicture=? WHERE email=?", function (err, result) {
+		maindb.query("UPDATE user SET profilepicture=? WHERE nickname=?", function (err, result) {
 			req.user.profilepicture=new_profilepicture;
 			res.redirect('/profile'); // átirányítjuk a profilra
 		//	next();
-	}, [[new_profilepicture, req.user.email]]);
+	}, [[new_profilepicture, req.user.nickname]]);
     });
 });
 
@@ -226,7 +226,7 @@ app.get('/notifications', function (req, res) {
 app.post('/notifications', function (req, res) {
 	var decision = req.body.answer;
 	//Kikeressük, hogy tényleg nem válaszolt-e még.
-	maindb.query("SELECT * FROM user WHERE email=?", function (err1, result1) {
+	maindb.query("SELECT * FROM user WHERE nickname=?", function (err1, result1) {
 		if(result1[0].answer_status!=0) {
 			//Már válaszolt
 			res.redirect('/notifications');
@@ -236,21 +236,21 @@ app.post('/notifications', function (req, res) {
 		var status_number;
 		if(decision=="Accept") status_number=1;
 		else if(decision=="Refuse") status_number=-1;
-		maindb.query("UPDATE user SET answer_status=? WHERE email=?", function (err, result) {
+		maindb.query("UPDATE user SET answer_status=? WHERE nickname=?", function (err, result) {
 			req.user.answer_status=status_number;
 			res.redirect('/notifications');
-		}, [[status_number, req.user.email]]);	
-	}, [[req.user.email]]);
+		}, [[status_number, req.user.nickname]]);
+	}, [[req.user.nickname]]);
 });
 
 app.get('/homepage', function (req, res) {
 	res.render('homepage');
 });
 
-app.get('/user/:user_lastname', function (req, res) {
+app.get('/user/:user_nickname', function (req, res) {
 	//másik user adatainak lekérdezése
 	var userdata = Object();
-	maindb.query("SELECT * FROM user WHERE lastname=?", function (err, result) {
+	maindb.query("SELECT * FROM user WHERE nickname=?", function (err, result) {
 		for (var i = 0; i < result.length; i++) {
 			userdata.firstname=result[i].firstname;
     		userdata.lastname=result[i].lastname;
@@ -262,13 +262,13 @@ app.get('/user/:user_lastname', function (req, res) {
 			userdata.genre=result[i].genre;
 			userdata.level=result[i].level;
 		}
-		if(req.user && userdata.email==req.user.email) {	//Ha be van jelentkezve ÉS a saját prolját nézi, akkor visszavisszük a profile-ra
+		if(req.user && userdata.nickname==req.user.nickname) {	//Ha be van jelentkezve ÉS a saját prolját nézi, akkor visszavisszük a profile-ra
 			res.redirect('/profile');
 			return;
 		}
 		//Ha nincs bejentkezve vagy nem a saját profilja.
 		res.render('other_profile', { POSTuserdata: userdata });
-	}, [[req.params.user_lastname]]);
+	}, [[req.params.user_nickname]]);
 });
 
 app.listen(3000, function () {
