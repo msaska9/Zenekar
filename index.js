@@ -139,13 +139,13 @@ app.post('/signup', function (req, res) {
 	data.level = req.body.level;
 	data.team = 0;
 	data.answer_status = 0;
-	data.descreption = req.body.descreption;
+	data.description = req.body.description;
 
 	//user adatatinak lementése az adatbázisba
-	maindb.query("INSERT INTO user (firstname, lastname, email, nickname, password, instrument, region, genre, level, team, answer_status, descreption, profilepicture) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", function (err, result) {
+	maindb.query("INSERT INTO user (firstname, lastname, email, nickname, password, instrument, region, genre, level, team, answer_status, description, profilepicture) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", function (err, result) {
 		matching(data.nickname, data.instrument);
 		res.render('signin');	//átirányítjuk a signin-ra
-	}, [[data.firstname, data.lastname, data.email, data.nickname, data.pw, data.instrument, data.region, data.genre, data.level,  data.team, data.answer_status, data.descreption,'images/default_picture.png']]);
+	}, [[data.firstname, data.lastname, data.email, data.nickname, data.pw, data.instrument, data.region, data.genre, data.level,  data.team, data.answer_status, data.description,'images/default_picture.png']]);
 });
 
 app.get('/', checkLogin); // használjuk a middlewaret, ha a /-re jön egy request
@@ -209,7 +209,7 @@ app.get('/notifications', function (req, res) {
 	if (!req.user) { // a user nincs bejelentkezve
 		console.log('user is not logged in');
 		res.redirect('/signin'); // átirányítjuk a bejelentkezéshez
-		return;
+		return; 
 	}
 	//tagok kikeresése
 	var team_members = Array();
@@ -262,7 +262,7 @@ app.get('/user/:user_nickname', function (req, res) {
 			userdata.genre=result[i].genre;
 			userdata.level=result[i].level;
 			userdata.profilepicture=result[i].profilepicture;
-			userdata.descreption=result[i].descreption;
+			userdata.description=result[i].description;
 		}
 		if(req.user && userdata.nickname==req.user.nickname) {	//Ha be van jelentkezve ÉS a saját prolját nézi, akkor visszavisszük a profile-ra
 			res.redirect('/profile');
@@ -275,7 +275,7 @@ app.get('/user/:user_nickname', function (req, res) {
 
 app.listen(3000, function () {
 	//Létrehozunk egy táblát, ha még nincs. (ha módosítottunk az adatbázisban, törölni kell azt!!!)
-	maindb.query("CREATE TABLE if not exists user (firstname TEXT, lastname TEXT, email TEXT, nickname TEXT, password TEXT, instrument TEXT, region TEXT, genre TEXT, level TEXT, team INTEGER, answer_status INTEGER, descreption TEXT, profilepicture TEXT)", null, [[]]);
+	maindb.query("CREATE TABLE if not exists user (firstname TEXT, lastname TEXT, email TEXT, nickname TEXT, password TEXT, instrument TEXT, region TEXT, genre TEXT, level TEXT, team INTEGER, answer_status INTEGER, description TEXT, profilepicture TEXT)", null, [[]]);
 	console.log('Example app listening on port 3000!');
 
 })
