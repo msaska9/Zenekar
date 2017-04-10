@@ -9,7 +9,7 @@ Kovetkezo parancs:
 ez felteszi az osszes fuggosegeket (body-parser, express, pug, sqlite3)
 
 Inditas:
-'node index.js'
+`node index.js`
 
 ## Tobb branch hasznalata
 Ahhoz, hogy megnezd, hogy milyen branch-eket hasznal a projekt, ezt kell beirnod a terminalba valahol a projekt mappajan belul:
@@ -27,3 +27,6 @@ A Githubon belul is tobb branch van, es nem mindegy, hogy amikor feltoltod a val
 Itt az origin jeloli azt, hogy a github felhojebe szeretned a kododat eljuttatni, a master pedig azt, hogy a master branchbe. Ez a dev branchnel
 viszont igy nez majd ki:
 `git push origin dev`
+
+## Adatbáziskezeléshez hasznos program:
+http://sqlitebrowser.org/
