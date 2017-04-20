@@ -1,4 +1,4 @@
-#Techtaboros zenekar app
+# Techtaboros zenekar app
 
 ## Kezdes
 Gittel ennek a reponak a klonozasa:
