@@ -146,16 +146,31 @@ app.post('/signup', function (req, res) {
 	data.team = 0;
 	data.answer_status = 0;
 	data.description = req.body.description;
+	var flag = 0;
 
-	// Email, Nickname duplikátum ellenőrzése
+	// Email duplikátum ellenőrzése
 	maindb.query('SELECT COUNT(email) AS "number_of_emails" FROM user WHERE email=?', function (err, result) {
         var number_of_emails = result[0].number_of_emails;
-
 		if (number_of_emails > 0){
 			console.log('email duplikátum');
+			flag = 1;
 		}
-//		res.render('notifications', { POSTmembers: team_members, POSTteamstatus: teamstatus, POSTcurrent_user: req.user});
 	}, [[data.email]]);
+
+	// Nickname duplikátum ellenőrzése
+	maindb.query('SELECT COUNT(nickname) AS "number_of_nicknames" FROM user WHERE nickname=?', function (err, result) {
+        var number_of_nicknames = result[0].number_of_nicknames;
+		if (number_of_nicknames > 0){
+			console.log('nickname duplikátum');
+			flag = 1;
+		}
+	}, [[data.nickname]]);
+
+	// Ha volt nickname duplikátum, kilépünk.
+	if (flag === 1){
+		res.render('signup');
+		return;
+	}
 
 	//user adatatinak lementése az adatbázisba
 	maindb.query("INSERT INTO user (firstname, lastname, email, nickname, password, instrument, region, genre, level, team, answer_status, description, profilepicture) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", function (err, result) {
@@ -203,6 +218,7 @@ app.get('/profile', function (req, res) {
 });
 
 app.post('/upload', upload.single('avatar'), function (req, res, next) {
+	if (typeof req.file !== 'undefined'){
 	console.log(req.file); //feltöltött file adatai
 	var current_location = req.file.path; //a kép ideiglenes helyének elérési útja
 	var image_type = path.extname(req.file.originalname).toLowerCase(); //Kép típusa (pl. .jpg, .png, ...)
@@ -219,6 +235,10 @@ app.post('/upload', upload.single('avatar'), function (req, res, next) {
 		//	next();
 	}, [[new_profilepicture, req.user.nickname]]);
     });
+	}
+	else{
+		res.redirect('/profile');
+	}
 });
 
 app.get('/notifications', function (req, res) {
