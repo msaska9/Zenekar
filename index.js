@@ -106,6 +106,11 @@ app.get('/signup', function (req, res) {
 	res.render('signup');
 });
 
+app.get('/logout', function(req, res){
+  req.logout();
+  res.redirect('/');
+});
+
 // Ez a passport middleware függvénye a bejelentkezéshez
 var auth = passport.authenticate('local', { successRedirect: '/', failureRedirect: '/signin' });
 app.post('/signin', auth);
