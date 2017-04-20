@@ -56,7 +56,7 @@ passport.use(new LocalStrategy(
 	}, function (username, password, done) { // a stratégia függvénye
 		maindb.query("SELECT * FROM user WHERE nickname=?", function (err, result) {
 			if ( result.length == 0 ) { // ha nem találtunk usert
-				console.log('No such user'); 
+				console.log('No such user');
 				return done(null, false);
 		  	} else {
 				var user = result[0]; // eltároljuk a user adatait
@@ -125,6 +125,7 @@ function matching(new_nickname, new_instrument) {
 
 };
 
+
 app.post('/signup', function (req, res) {
 	var data = Object();
 	data.firstname = req.body.firstname;
@@ -140,6 +141,15 @@ app.post('/signup', function (req, res) {
 	data.team = 0;
 	data.answer_status = 0;
 	data.description = req.body.description;
+
+	// Email, Nickname duplikátum ellenőrzése
+	maindb.query('SELECT COUNT(email) AS "number_of_emails" FROM user WHERE email=?', function (err, result) {
+		console.log(result);
+		if (result.number_of_emails > 0){
+			console.log('email duplikátum');
+		}
+//		res.render('notifications', { POSTmembers: team_members, POSTteamstatus: teamstatus, POSTcurrent_user: req.user});
+	}, [[data.email]]);
 
 	//user adatatinak lementése az adatbázisba
 	maindb.query("INSERT INTO user (firstname, lastname, email, nickname, password, instrument, region, genre, level, team, answer_status, description, profilepicture) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", function (err, result) {
