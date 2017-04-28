@@ -146,37 +146,28 @@ app.post('/signup', function (req, res) {
 	data.team = 0;
 	data.answer_status = 0;
 	data.description = req.body.description;
+
 	var flag = 0;
 
-	// Email duplikátum ellenőrzése
+	// Email es nickname duplikátum ellenőrzése
 	maindb.query('SELECT COUNT(email) AS "number_of_emails" FROM user WHERE email=?', function (err, result) {
         var number_of_emails = result[0].number_of_emails;
-		if (number_of_emails > 0){
-			console.log('email duplikátum');
-			flag = 1;
-		}
+
+        maindb.query('SELECT COUNT(nickname) AS "number_of_nicknames" FROM user WHERE nickname=?', function (err, result) {
+            var number_of_nicknames = result[0].number_of_nicknames;
+
+            if( number_of_nicknames + number_of_emails == 0 ){
+                console.log("Email vagy nickname duplikatum");
+
+                maindb.query("INSERT INTO user (firstname, lastname, email, nickname, password, instrument, region, genre, level, team, answer_status, description, profilepicture) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", function (err, result) {
+                    matching(data.nickname, data.instrument);
+                }, [[data.firstname, data.lastname, data.email, data.nickname, data.pw, data.instrument, data.region, data.genre, data.level,  data.team, data.answer_status, data.description,'images/default_picture.png']]);
+
+                res.redirect('/signin');
+            } else res.redirect('/signup');
+        }, [[data.nickname]]);
 	}, [[data.email]]);
 
-	// Nickname duplikátum ellenőrzése
-	maindb.query('SELECT COUNT(nickname) AS "number_of_nicknames" FROM user WHERE nickname=?', function (err, result) {
-        var number_of_nicknames = result[0].number_of_nicknames;
-		if (number_of_nicknames > 0){
-			console.log('nickname duplikátum');
-			flag = 1;
-		}
-	}, [[data.nickname]]);
-
-	// Ha volt nickname duplikátum, kilépünk.
-	if (flag === 1){
-		res.render('signup');
-		return;
-	}
-
-	//user adatatinak lementése az adatbázisba
-	maindb.query("INSERT INTO user (firstname, lastname, email, nickname, password, instrument, region, genre, level, team, answer_status, description, profilepicture) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", function (err, result) {
-		matching(data.nickname, data.instrument);
-		res.render('signin');	//átirányítjuk a signin-ra
-	}, [[data.firstname, data.lastname, data.email, data.nickname, data.pw, data.instrument, data.region, data.genre, data.level,  data.team, data.answer_status, data.description,'images/default_picture.png']]);
 });
 
 app.get('/', checkLogin); // használjuk a middlewaret, ha a /-re jön egy request
