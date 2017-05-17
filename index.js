@@ -127,7 +127,6 @@ function matching(new_nickname, new_instrument) {
 			}
 		}, [[]]);
 	}, [[new_instrument]]);
-
 };
 
 
@@ -157,14 +156,14 @@ app.post('/signup', function (req, res) {
             var number_of_nicknames = result[0].number_of_nicknames;
 
             if( number_of_nicknames + number_of_emails == 0 ){
-                console.log("Email vagy nickname duplikatum");
-
                 maindb.query("INSERT INTO user (firstname, lastname, email, nickname, password, instrument, region, genre, level, team, answer_status, description, profilepicture) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", function (err, result) {
                     matching(data.nickname, data.instrument);
                 }, [[data.firstname, data.lastname, data.email, data.nickname, data.pw, data.instrument, data.region, data.genre, data.level,  data.team, data.answer_status, data.description,'images/default_picture.png']]);
 
                 res.redirect('/signin');
-            } else res.redirect('/signup');
+            } else{
+                console.log("Email vagy nickname duplikatum");
+			 	res.redirect('/signup');}
         }, [[data.nickname]]);
 	}, [[data.email]]);
 
@@ -199,6 +198,30 @@ app.get('/list', function (req, res) {
 	}, [[]]);
 });
 
+app.post('/list', function (req, res) {
+	if (!req.user) { // a user nincs bejelentkezve
+		console.log('user is not logged in');
+		res.redirect('/signin'); // átirányítjuk a bejelentkezéshez
+		return;
+	}
+
+	var data = Object();
+	data.list_search = req.body.list_search;
+	console.log('Search in list for ' + data.list_search);
+
+	//lekérdezi az összes felhasználó adatait
+	var array = Array();
+	//maindb.query("SELECT * FROM user", function (err, result) {
+	maindb.query("SELECT * FROM user WHERE firstname LIKE '%"+data.list_search+"%' OR lastname LIKE '%"+data.list_search+"%'", function (err, result) {
+		for (var i = 0; i < result.length; i++) {
+			console.log(result[i].lastname);
+    		array.push([result[i].firstname, result[i].lastname, result[i].email, result[i].nickname, result[i].instrument, result[i].region, result[i].genre, result[i].level, result[i].team]);
+		}
+		res.render('list', { POSTuser: array });
+	}, [[]]);
+});
+
+
 app.get('/profile', function (req, res) {
 	if (!req.user) { // a user nincs bejelentkezve
 		console.log('user is not logged in');
@@ -207,6 +230,37 @@ app.get('/profile', function (req, res) {
 	}
 	res.render('profile', { POSTuserdata: req.user });
 });
+
+app.get('/settings', function (req, res) {
+	if (!req.user) { // a user nincs bejelentkezve
+		console.log('user is not logged in');
+		res.redirect('/signin'); // átirányítjuk a bejelentkezéshez
+		return;
+	}
+	res.render('settings', { POSTuserdata: req.user });
+});
+
+app.post('/settings', function (req, res) {
+	var data = Object();
+	data.firstname = req.body.firstname;
+	data.lastname = req.body.lastname;
+	data.email = req.body.email;
+	data.instrument = req.body.instrument;
+	data.region = req.body.region;
+	data.genre = req.body.genre;
+	data.level = req.body.level;
+	data.team = 0;
+	data.answer_status = 0;
+	data.description = req.body.description;
+		
+		maindb.query("UPDATE user SET profilepicture=? WHERE nickname=?", function (err, result) {
+			req.user.profilepicture=new_profilepicture;
+			res.redirect('/profile'); // átirányítjuk a profilra
+	}, [[new_profilepicture, req.user.nickname]]);
+	
+
+});
+
 
 app.post('/upload', upload.single('avatar'), function (req, res, next) {
 	if (typeof req.file !== 'undefined'){

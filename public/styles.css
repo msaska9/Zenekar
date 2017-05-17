@@ -45,3 +45,8 @@ body.welcome-page {
 .signin-form a {
 	color: yellow;
 }
+
+hr {
+	margin-bottom: 5pt;
+	margin-top: 0pt;
+}
