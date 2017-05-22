@@ -228,6 +228,7 @@ app.get('/profile', function (req, res) {
 		res.redirect('/signin'); // átirányítjuk a bejelentkezéshez
 		return;
 	}
+	console.log(req.user);
 	res.render('profile', { POSTuserdata: req.user });
 });
 
@@ -240,26 +241,40 @@ app.get('/settings', function (req, res) {
 	res.render('settings', { POSTuserdata: req.user });
 });
 
-/*app.post('/settings', function (req, res) {
+app.post('/settings', function (req, res) {
+	if (!req.user) { // a user nincs bejelentkezve
+		console.log('user is not logged in');
+		res.redirect('/signin'); // átirányítjuk a bejelentkezéshez
+		return;
+	}
+
 	var data = Object();
 	data.firstname = req.body.firstname;
 	data.lastname = req.body.lastname;
 	data.email = req.body.email;
+	data.nickname = req.user.nickname;
 	data.instrument = req.body.instrument;
 	data.region = req.body.region;
 	data.genre = req.body.genre;
 	data.level = req.body.level;
-	data.team = 0;
-	data.answer_status = 0;
 	data.description = req.body.description;
-		
-		maindb.query("UPDATE user SET profilepicture=? WHERE nickname=?", function (err, result) {
-			req.user.profilepicture=new_profilepicture;
-			res.redirect('/profile'); // átirányítjuk a profilra
-	}, [[new_profilepicture, req.user.nickname]]);
-	
 
-});*/
+
+	maindb.query("UPDATE user SET firstname=?, lastname=?, email=?, instrument=?, region=?, genre=?, level=?, description=? WHERE nickname=?", function (err, result) {
+		maindb.query("SELECT * FROM user WHERE nickname=?", function (err2, result2) {
+			req.user.firstname=result2[0].firstname;
+			req.user.lastname=result2[0].lastname;
+			req.user.email=result2[0].email;
+			req.user.instrument=result2[0].instrument;
+			req.user.region=result2[0].region;
+			req.user.genre=result2[0].genre;
+			req.user.level=result2[0].level;
+			req.user.description=result2[0].description;
+			res.redirect('/settings');
+		}, [[data.nickname]]);
+	}, [[data.firstname, data.lastname, data.email, data.instrument, data.region, data.genre, data.level, data.description, data.nickname]]);
+
+});
 
 
 app.post('/upload', upload.single('avatar'), function (req, res, next) {
