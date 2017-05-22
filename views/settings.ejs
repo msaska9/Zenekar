@@ -56,18 +56,109 @@
 			</div>
 		</nav>
 
-        <div class="container">
-            <div class="row">
+		<div class="container">
+			<div class="row">
                 <div class="col-md-6" style="text-align: left;">
-					<label for="firstname">Firstname: </label>
-					<input type="text" name="firstname" class="form-control" placeholder=<%=POSTuserdata.firstname%>>
-					<input type="text" name="lastname" class="form-control" placeholder=<%=POSTuserdata.lastname%>>
-					<input type="text" name="email" class="form-control" placeholder=<%=POSTuserdata.email%>>
-					<input type="text" name="instrument" class="form-control" placeholder=<%=POSTuserdata.instrument%>>
-					<input type="text" name="region" class="form-control" placeholder=<%=POSTuserdata.region%>>
-					<input type="text" name="genre" class="form-control" placeholder=<%=POSTuserdata.genre%>>
-					<input type="text" name="level" class="form-control" placeholder=<%=POSTuserdata.level%>>
-					<input type="text" name="description" class="form-control" placeholder=<%=POSTuserdata.description%>>
+					<div class="form-group">
+						<label for="firstname">Firstname: </label>
+						<input type="text" name="firstname" class="form-control" placeholder=<%=POSTuserdata.firstname%>>
+					</div>
+
+					<div class="form-group">
+						<label for="firstname">Lastname: </label>
+						<input type="text" name="lastname" class="form-control" placeholder=<%=POSTuserdata.lastname%>>
+					</div>
+
+					<div class="form-group">
+						<label for="firstname">New email: </label>
+						<input type="text" name="email" class="form-control" placeholder=<%=POSTuserdata.email%>>
+					</div>
+
+					<div class="form-group">
+						<label for="instrument">Instrument: </label>
+						<select class="form-control" name="instrument">
+							<option>Accordion</option>
+							<option>Bass Guitar</option>
+							<option>Cello</option>
+							<option>Clarinet</option>
+							<option>DJ</option>
+							<option>Double Bass</option>
+							<option>Drums</option>
+							<option>Guitar</option>
+							<option>Harp</option>
+							<option>Piano</option>
+							<option>Saxophone</option>
+							<option>Vibraphone</option>	
+							<option>Viola</option>
+							<option>Violin</option>
+						</select>
+					</div>
+
+					<div class="form-group">
+						<label for="region">Region: </label>
+						<select class="form-control" name="region">
+							<option>Bács-kiskun megye</option>
+							<option>Baranya megye</option>
+							<option>Békés megye</option>
+							<option>Borsod-Abaúj-Zemplén megye</option>
+							<option>Csongrád megye</option>
+							<option>Fejér megye</option>
+							<option>Győr-Moson-Sopron megye</option>
+							<option>Hajdú-Bihar megye</option>
+							<option>Heves megye</option>
+							<option>Jász-Nagykun-Szolnok megye</option>
+							<option>Komárom-Esztergom megye</option>
+							<option>Nógrád megye</option>
+							<option>Pest megye</option>
+							<option>Somogy megye</option>
+							<option>Szabolcs-Szatmár-Bereg megye</option>
+							<option>Tolna megye</option>
+							<option>Vas megye</option>
+							<option>Veszprém megye</option>
+							<option>Zala megye</option>
+						</select>
+					</div>
+				<div class="form-group">
+					<label for="genre">Genre: </label>
+					<select class="form-control" name="genre">
+						<option>Blues</option>
+						<option>Classical Music</option>
+						<option>Country</option>
+						<option>Electronic Music</option>
+						<option>Folk</option>
+						<option>Heavy Metal</option>
+						<option>Hip Hop</option>
+						<option>Jazz</option>
+						<option>Latin</option>
+						<option>Pop</option>
+						<option>Rock</option>
+						<option>R&B and Soul</option>
+					</select>
+				</div>
+
+				<div class="form-group">
+					<label for="level">Level: </label>
+					<select class="form-control" name="level">
+						<option>1</option>
+						<option>2</option>
+						<option>3</option>
+						<option>4</option>
+						<option>5</option>
+						<option>6</option>
+						<option>7</option>
+						<option>8</option>
+						<option>9</option>
+						<option>10</option>
+					</select>
+					<p style="font-style: italic; font-size: small; font-weight: lighter; margin-top: 2px">1-beginner 10-professional</p>
+				</div>
+
+				<div class="form-group">
+					<label for="description">Description: </label>
+					<textarea class="form-control" name="description" rows="4" cols="50"></textarea>
+				</div>
+
+				<button type="button" class="btn btn-success"> Accept </button>
 
                 </div>
                 <div class="col-md-6">
