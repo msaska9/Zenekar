@@ -39,18 +39,8 @@
 					<ul class="nav navbar-nav navbar-right">
 						<li><a href="/list">List</a></li>
 						<li><a href="/suggestions">Suggestions</a></li>
-						<li class="dropdown">
-							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-								&#8801
-								<span class="caret"></span>
-							</a>
-							<ul class="dropdown-menu">
-								<li><a href="/profile">My Profile</a></li>
-								<li><a href="/settings">Settings</a></li>
-								<li role="separator" class="divider"></li>
-								<li><a href="/logout">Log Out</a></li>
-							</ul>
-						</li>
+						<li><a href="/settings">Settings</a></li>
+						<li><a href="/logout">Log Out</a></li>
 					</ul>
 				</div>
 			</div>
@@ -60,16 +50,37 @@
             <div class="row">
                 <div class="col-md-6" style="text-align: left;">
                     <h1><%=POSTuserdata.lastname%> <%=POSTuserdata.firstname%></h1>
-                    <h2><%=POSTuserdata.email%></h2>
-                    <h2><%=POSTuserdata.nickname%></h2>
-                    <h2><%=POSTuserdata.instrument%></h2>
-                    <h2><%=POSTuserdata.region%></h2>
-                    <h2><%=POSTuserdata.genre%></h2>
-                    <h2><%=POSTuserdata.level%></h2>
+					<h2>Contact</h2>
+					<hr>
+                    <p><b>Email: </b><%=POSTuserdata.email%></p>
+
+					<h2>Nickname</h2>
+					<hr>
+                    <p><%=POSTuserdata.nickname%></p>
+
+					<h2>Region</h2>
+					<hr>
+                    <p><%=POSTuserdata.region%></p>
+
+					<h2>Genre</h2>
+					<hr>
+                    <p><%=POSTuserdata.genre%></p>
+
+					<h2>Instrument(s)</h2>
+					<hr>
+                    <p><%=POSTuserdata.instrument%></p>
+
+					<h2>About</h2>
+					<hr>
+                    <p><b>Level:</b> <%=POSTuserdata.level%><p>
                     <p><%=POSTuserdata.description%></p>
                 </div>
                 <div class="col-md-6">
-                    <img src="../<%=POSTuserdata.profilepicture%>" alt="No Image!"  style="width:300pt">
+                    <img src="<%=POSTuserdata.profilepicture%>" alt="No Image!" style="width:300pt; margin-bottom: 10pt">
+                    <form method="post" enctype="multipart/form-data" action="/upload">
+                        <input type="file" name="avatar" style="margin-bottom: 5pt">
+                        <input type="submit" value="Submit" class="btn btn-default">
+                    </form>
                 </div>
             </div>
         </div>
