@@ -127,7 +127,7 @@ function matching(new_nickname, new_instrument, new_genre, new_region, new_level
 			}
 		}, [[]]);
 	}, [[new_instrument, new_genre, new_region, new_level]]);
-};
+}
 
 
 app.post('/signup', function (req, res) {
@@ -156,9 +156,9 @@ app.post('/signup', function (req, res) {
             var number_of_nicknames = result[0].number_of_nicknames;
 
             if( number_of_nicknames + number_of_emails == 0 ){
-                maindb.query("INSERT INTO user (firstname, lastname, email, nickname, password, instrument, region, genre, level, team, answer_status, description, profilepicture) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", function (err, result) {
+                maindb.query("INSERT INTO user (firstname, lastname, email, nickname, password, instrument, region, genre, level, team, answer_status, description, profilepicture, profilemusic) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", function (err, result) {
                     matching(data.nickname, data.instrument, data.genre, data.region, data.level);
-                }, [[data.firstname, data.lastname, data.email, data.nickname, data.pw, data.instrument, data.region, data.genre, data.level,  data.team, data.answer_status, data.description,'images/default_picture.png']]);
+                }, [[data.firstname, data.lastname, data.email, data.nickname, data.pw, data.instrument, data.region, data.genre, data.level,  data.team, data.answer_status, data.description,'images/default_picture.png', 'musics/default_music.mp3']]);
 
                 res.redirect('/signin');
             } else{
@@ -176,7 +176,7 @@ app.get('/database', function (req, res) {
 	var array = Array();
 	maindb.query("SELECT * FROM user", function (err, result) {
 		for (var i = 0; i < result.length; i++) {
-    		array.push([result[i].firstname, result[i].lastname, result[i].email, result[i].nickname, result[i].password, result[i].instrument, result[i].region, result[i].genre, result[i].level, result[i].team, result[i].answer_status]);
+    		array.push([result[i].firstname, result[i].lastname, result[i].email, result[i].nickname, result[i].password, result[i].instrument, result[i].region, result[i].genre, result[i].level, result[i].team, result[i].answer_status, result[i].profilepicture, result[i].profilemusic]);
 		}
 		res.render('database', { POSTuser: array });
 	}, [[]]);
@@ -277,7 +277,7 @@ app.post('/settings', function (req, res) {
 });
 
 
-app.post('/upload', upload.single('avatar'), function (req, res, next) {
+app.post('/uploadimage', upload.single('avatar'), function (req, res, next) {
 	if (typeof req.file !== 'undefined'){
 	console.log(req.file); //feltöltött file adatai
 	var current_location = req.file.path; //a kép ideiglenes helyének elérési útja
@@ -291,13 +291,37 @@ app.post('/upload', upload.single('avatar'), function (req, res, next) {
 		//adatbázis frissítése az új képpel
 		maindb.query("UPDATE user SET profilepicture=? WHERE nickname=?", function (err, result) {
 			req.user.profilepicture=new_profilepicture;
-			res.redirect('/profile'); // átirányítjuk a profilra
+			res.redirect('/settings'); // átirányítjuk a profilra
 		//	next();
 	}, [[new_profilepicture, req.user.nickname]]);
     });
 	}
 	else{
-		res.redirect('/profile');
+		res.redirect('/settings');
+	}
+});
+
+app.post('/uploadmusic', upload.single('avatar'), function (req, res, next) {
+	if (typeof req.file !== 'undefined'){
+	console.log(req.file); //feltöltött file adatai
+	var current_location = req.file.path; //a zene ideiglenes helyének elérési útja
+	var music_type = path.extname(req.file.originalname).toLowerCase(); //Zene típusa (pl. .mp3, ...)
+	var dest = "public/musics/" + req.user.nickname + music_type;
+	var new_profilemusic = "musics/" + req.user.nickname + music_type; //kép végleges helyének elérési úrja
+	//Kép áthelyezése ideiglenes helyről a végleges helyre
+	fs.rename(current_location, dest, function(err) {
+        if (err) throw err;
+        console.log("Upload completed!");
+		//adatbázis frissítése az új képpel
+		maindb.query("UPDATE user SET profilemusic=? WHERE nickname=?", function (err, result) {
+			req.user.profilemusic=new_profilemusic;
+			res.redirect('/settings'); // átirányítjuk a profilra
+		//	next();
+	}, [[new_profilemusic, req.user.nickname]]);
+    });
+	}
+	else{
+		res.redirect('/settings');
 	}
 });
 
@@ -358,6 +382,7 @@ app.get('/user/:user_nickname', function (req, res) {
 			userdata.genre=result[i].genre;
 			userdata.level=result[i].level;
 			userdata.profilepicture=result[i].profilepicture;
+//			userdata.profilemusic=result[i].profilemusic;
 			userdata.description=result[i].description;
 		}
 		if(req.user && userdata.nickname==req.user.nickname) {	//Ha be van jelentkezve ÉS a saját prolját nézi, akkor visszavisszük a profile-ra
@@ -371,7 +396,7 @@ app.get('/user/:user_nickname', function (req, res) {
 
 app.listen(3000, function () {
 	//Létrehozunk egy táblát, ha még nincs. (ha módosítottunk az adatbázisban, törölni kell azt!!!)
-	maindb.query("CREATE TABLE if not exists user (firstname TEXT, lastname TEXT, email TEXT, nickname TEXT, password TEXT, instrument TEXT, region TEXT, genre TEXT, level TEXT, team INTEGER, answer_status INTEGER, description TEXT, profilepicture TEXT)", null, [[]]);
+	maindb.query("CREATE TABLE if not exists user (firstname TEXT, lastname TEXT, email TEXT, nickname TEXT, password TEXT, instrument TEXT, region TEXT, genre TEXT, level TEXT, team INTEGER, answer_status INTEGER, description TEXT, profilepicture TEXT, profilemusic TEXT)", null, [[]]);
 	console.log('Example app listening on port 3000!');
 
 })
