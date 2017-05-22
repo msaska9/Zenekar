@@ -118,7 +118,7 @@ app.post('/signin', auth);
 // Összepárosító függvény
 function matching(new_nickname, new_instrument, new_genre, new_region, new_level) {
 	console.log('Matching');
-	maindb.query("SELECT * FROM user WHERE instrument!=? AND genre=? AND region=? AND level-?<2 AND team=0", function (err, result) {		//Kinek van nem ilyen hangszere?
+	maindb.query("SELECT * FROM user WHERE instrument!=? AND genre=? AND region=? AND ABS(level-?)<2 AND team=0", function (err, result) {		//Kinek van nem ilyen hangszere?
 		maindb.query("SELECT team FROM user ORDER BY 1 DESC LIMIT 1", function (err2, result2) {			//Legnagyobb team lekérdezése
 			var number_of_teams = result2[0].team;
 			if(result.length>0) { //Van-e eredmény?
