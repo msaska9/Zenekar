@@ -116,9 +116,9 @@ var auth = passport.authenticate('local', { successRedirect: '/', failureRedirec
 app.post('/signin', auth);
 
 // Összepárosító függvény
-function matching(new_nickname, new_instrument) {
+function matching(new_nickname, new_instrument, new_genre, new_region, new_level) {
 	console.log('Matching');
-	maindb.query("SELECT * FROM user WHERE instrument!=? AND team=0", function (err, result) {		//Kinek van nem ilyen hangszere?
+	maindb.query("SELECT * FROM user WHERE instrument!=? AND genre=? AND region=? AND level-?<2 AND team=0", function (err, result) {		//Kinek van nem ilyen hangszere?
 		maindb.query("SELECT team FROM user ORDER BY 1 DESC LIMIT 1", function (err2, result2) {			//Legnagyobb team lekérdezése
 			var number_of_teams = result2[0].team;
 			if(result.length>0) { //Van-e eredmény?
@@ -126,7 +126,7 @@ function matching(new_nickname, new_instrument) {
 				}, [[number_of_teams+1, new_nickname, result[0].nickname]]);	//"team"-t beállítjuk a két emberünknek
 			}
 		}, [[]]);
-	}, [[new_instrument]]);
+	}, [[new_instrument, new_genre, new_region, new_level]]);
 };
 
 
@@ -157,7 +157,7 @@ app.post('/signup', function (req, res) {
 
             if( number_of_nicknames + number_of_emails == 0 ){
                 maindb.query("INSERT INTO user (firstname, lastname, email, nickname, password, instrument, region, genre, level, team, answer_status, description, profilepicture) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", function (err, result) {
-                    matching(data.nickname, data.instrument);
+                    matching(data.nickname, data.instrument, data.genre, data.region, data.level);
                 }, [[data.firstname, data.lastname, data.email, data.nickname, data.pw, data.instrument, data.region, data.genre, data.level,  data.team, data.answer_status, data.description,'images/default_picture.png']]);
 
                 res.redirect('/signin');
