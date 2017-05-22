@@ -240,7 +240,7 @@ app.get('/settings', function (req, res) {
 	res.render('settings', { POSTuserdata: req.user });
 });
 
-app.post('/settings', function (req, res) {
+/*app.post('/settings', function (req, res) {
 	var data = Object();
 	data.firstname = req.body.firstname;
 	data.lastname = req.body.lastname;
@@ -259,7 +259,7 @@ app.post('/settings', function (req, res) {
 	}, [[new_profilepicture, req.user.nickname]]);
 	
 
-});
+});*/
 
 
 app.post('/upload', upload.single('avatar'), function (req, res, next) {
