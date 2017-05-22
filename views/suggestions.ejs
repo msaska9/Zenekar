@@ -38,7 +38,7 @@
 
 					<ul class="nav navbar-nav navbar-right">
 						<li><a href="/list">List</a></li>
-						<li><a href="/notifications">Notifications</a></li>
+						<li><a href="/suggestions">Suggestions</a></li>
 						<li class="dropdown">
 							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
 								&#8801
@@ -94,7 +94,7 @@
                 </tbody>
             </table>
 				<% if(POSTcurrent_user.answer_status==0) { %>
-					<form method="POST" action="http://localhost:3000/notifications">
+					<form method="POST" action="http://localhost:3000/suggestions">
 
 					<select class="form-control" name="answer" style="width:75pt; margin-bottom:10pt">
 						<option>Accept</option>

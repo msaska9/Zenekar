@@ -301,7 +301,7 @@ app.post('/upload', upload.single('avatar'), function (req, res, next) {
 	}
 });
 
-app.get('/notifications', function (req, res) {
+app.get('/suggestions', function (req, res) {
 	if (!req.user) { // a user nincs bejelentkezve
 		console.log('user is not logged in');
 		res.redirect('/signin'); // átirányítjuk a bejelentkezéshez
@@ -316,17 +316,17 @@ app.get('/notifications', function (req, res) {
 			if(result[i].answer_status==-1) teamstatus=-1;		//ha van -1, akkor örök -1
 			else if(result[i].answer_status==0 && teamstatus==1) teamstatus=0;	//ha 0 a status valakinél és nincs -1, akkor teamstatus=0
 		}
-		res.render('notifications', { POSTmembers: team_members, POSTteamstatus: teamstatus, POSTcurrent_user: req.user});
+		res.render('suggestions', { POSTmembers: team_members, POSTteamstatus: teamstatus, POSTcurrent_user: req.user});
 	}, [[req.user.team]]);
 });
 
-app.post('/notifications', function (req, res) {
+app.post('/suggestions', function (req, res) {
 	var decision = req.body.answer;
 	//Kikeressük, hogy tényleg nem válaszolt-e még.
 	maindb.query("SELECT * FROM user WHERE nickname=?", function (err1, result1) {
 		if(result1[0].answer_status!=0) {
 			//Már válaszolt
-			res.redirect('/notifications');
+			res.redirect('/suggestions');
 			return;	
 		}
 		//még nem válaszolt, válaszát beírjuk az adatbázisba
@@ -335,7 +335,7 @@ app.post('/notifications', function (req, res) {
 		else if(decision=="Refuse") status_number=-1;
 		maindb.query("UPDATE user SET answer_status=? WHERE nickname=?", function (err, result) {
 			req.user.answer_status=status_number;
-			res.redirect('/notifications');
+			res.redirect('/suggestions');
 		}, [[status_number, req.user.nickname]]);
 	}, [[req.user.nickname]]);
 });
