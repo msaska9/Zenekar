@@ -283,7 +283,7 @@ app.post('/uploadimage', upload.single('avatar'), function (req, res, next) {
 	var current_location = req.file.path; //a kép ideiglenes helyének elérési útja
 	var image_type = path.extname(req.file.originalname).toLowerCase(); //Kép típusa (pl. .jpg, .png, ...)
 	var dest = "public/images/" + req.user.nickname + image_type;
-	var new_profilepicture = "images/" + req.user.nickname + image_type; //kép végleges helyének elérési úrja
+	var new_profilepicture = "/images/" + req.user.nickname + image_type; //kép végleges helyének elérési úrja
 	//Kép áthelyezése ideiglenes helyről a végleges helyre
 	fs.rename(current_location, dest, function(err) {
         if (err) throw err;
