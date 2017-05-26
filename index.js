@@ -158,7 +158,7 @@ app.post('/signup', function (req, res) {
             if( number_of_nicknames + number_of_emails == 0 ){
                 maindb.query("INSERT INTO user (firstname, lastname, email, nickname, password, instrument, region, genre, level, team, answer_status, description, profilepicture, profilemusic) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", function (err, result) {
                     matching(data.nickname, data.instrument, data.genre, data.region, data.level);
-                }, [[data.firstname, data.lastname, data.email, data.nickname, data.pw, data.instrument, data.region, data.genre, data.level,  data.team, data.answer_status, data.description,'images/default_picture.png', 'musics/default_music.mp3']]);
+                }, [[data.firstname, data.lastname, data.email, data.nickname, data.pw, data.instrument, data.region, data.genre, data.level,  data.team, data.answer_status, data.description,'/images/default_picture.png', '/musics/default_music.mp3']]);
 
                 res.redirect('/signin');
             } else{
@@ -307,7 +307,7 @@ app.post('/uploadmusic', upload.single('avatar'), function (req, res, next) {
 	var current_location = req.file.path; //a zene ideiglenes helyének elérési útja
 	var music_type = path.extname(req.file.originalname).toLowerCase(); //Zene típusa (pl. .mp3, ...)
 	var dest = "public/musics/" + req.user.nickname + music_type;
-	var new_profilemusic = "musics/" + req.user.nickname + music_type; //kép végleges helyének elérési úrja
+	var new_profilemusic = "/musics/" + req.user.nickname + music_type; //kép végleges helyének elérési úrja
 	//Kép áthelyezése ideiglenes helyről a végleges helyre
 	fs.rename(current_location, dest, function(err) {
         if (err) throw err;
