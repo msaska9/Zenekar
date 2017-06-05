@@ -183,18 +183,18 @@ app.get('/database', function (req, res) {
 });
 
 app.get('/list', function (req, res) {
-	if (!req.user) { // a user nincs bejelentkezve
-		console.log('user is not logged in');
-		res.redirect('/signin'); // átirányítjuk a bejelentkezéshez
-		return;
-	}
 	//lekérdezi az összes felhasználó adatait
 	var array = Array();
 	maindb.query("SELECT * FROM user", function (err, result) {
 		for (var i = 0; i < result.length; i++) {
     		array.push([result[i].firstname, result[i].lastname, result[i].email, result[i].nickname, result[i].instrument, result[i].region, result[i].genre, result[i].level, result[i].team]);
 		}
-		res.render('list', { POSTuser: array });
+	if (!req.user) {	// a user nincs bejelentkezve
+		res.render('list_nolog', { POSTuser: array });
+		return;
+	} else {			// a user be van jelentkezve
+		res.render('list', { POSTuser: array });		
+	}
 	}, [[]]);
 });
 
@@ -212,7 +212,7 @@ app.post('/list', function (req, res) {
 	//lekérdezi az összes felhasználó adatait
 	var array = Array();
 	//maindb.query("SELECT * FROM user", function (err, result) {
-	maindb.query("SELECT * FROM user WHERE firstname LIKE '%"+data.list_search+"%' OR lastname LIKE '%"+data.list_search+"%'", function (err, result) {
+	maindb.query("SELECT * FROM user WHERE firstname LIKE '%"+data.list_search+"%' OR lastname LIKE '%"+data.list_search+"%' OR email LIKE '%"+data.list_search+"%' OR nickname LIKE '%"+data.list_search+"%' OR instrument LIKE '%"+data.list_search+"%' OR region LIKE '%"+data.list_search+"%' OR genre LIKE '%"+data.list_search+"%' OR level LIKE '%"+data.list_search+"%'", function (err, result) {
 		for (var i = 0; i < result.length; i++) {
 			console.log(result[i].lastname);
     		array.push([result[i].firstname, result[i].lastname, result[i].email, result[i].nickname, result[i].instrument, result[i].region, result[i].genre, result[i].level, result[i].team]);
@@ -372,6 +372,10 @@ app.get('/user/:user_nickname', function (req, res) {
 	//másik user adatainak lekérdezése
 	var userdata = Object();
 	maindb.query("SELECT * FROM user WHERE nickname=?", function (err, result) {
+		if(result.length==0){
+			res.render('noprofile');
+			return;
+		}
 		for (var i = 0; i < result.length; i++) {
 			userdata.firstname=result[i].firstname;
 			userdata.lastname=result[i].lastname;
@@ -382,15 +386,22 @@ app.get('/user/:user_nickname', function (req, res) {
 			userdata.genre=result[i].genre;
 			userdata.level=result[i].level;
 			userdata.profilepicture=result[i].profilepicture;
-//			userdata.profilemusic=result[i].profilemusic;
+			userdata.profilemusic=result[i].profilemusic;
 			userdata.description=result[i].description;
 		}
-		if(req.user && userdata.nickname==req.user.nickname) {	//Ha be van jelentkezve ÉS a saját prolját nézi, akkor visszavisszük a profile-ra
-			res.redirect('/profile');
-			return;
+		
+		if(req.user) {	//Ha be van jelentkezve ÉS a saját prolját nézi, akkor visszavisszük a profile-ra
+
+			if(userdata.nickname==req.user.nickname){	//Be van jelentkezve és a saját profilját nézi
+				res.redirect('/profile');
+				return;
+			} else {	//Be van jelentkezve de más profilt nézi
+				res.render('other_profile', { POSTotheruserdata: userdata });
+			}
+		} else {		//Ha nincs bejentkezve
+			res.render('other_profile_nolog', { POSTotheruserdata: userdata });
 		}
-		//Ha nincs bejentkezve vagy nem a saját profilja.
-		res.render('other_profile', { POSTuserdata: userdata });
+
 	}, [[req.params.user_nickname]]);
 });
 

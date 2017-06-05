@@ -11,7 +11,7 @@
 		    crossorigin="anonymous">
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp"
 		    crossorigin="anonymous">
-		<link href="styles.css" rel="stylesheet" type="text/css">
+		<link href="/styles.css" rel="stylesheet" type="text/css">
 
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
@@ -44,7 +44,7 @@
 					<ul class="nav navbar-nav navbar-right">
 						<li><a href="/list">List</a></li>
 						<li><a href="/suggestions">Suggestions</a></li>
-						<li><a href="/settings">Settings</a></li>
+						<li class="currentpage-buttons"><a href="/settings">Settings</a></li>
 						<li><a href="/logout">Log Out</a></li>
 						</li>
 					</ul>
@@ -89,6 +89,7 @@
 							<option>Harp</option>
 							<option>Piano</option>
 							<option>Saxophone</option>
+							<option>Singer</option>
 							<option>Vibraphone</option>	
 							<option>Viola</option>
 							<option>Violin</option>
@@ -177,10 +178,9 @@
 					<form method="post" enctype="multipart/form-data" action="/uploadmusic">
 						<label for="avatar">Upload music: </label>
 						<input type="file" name="avatar" style="margin-bottom: 5pt">
-						<input type="submit" value="Submit" class="btn btn-default">
+						<input type="submit" value="Submit" class="btn btn-default" style="margin-bottom: 100pt">
 					</form>
 					</div>
-
 				</div>
 			</div>
 		</div>
